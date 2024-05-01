@@ -67,10 +67,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "ny_restaurants_front:build:production"
+              "buildTarget": "ny_restaurants_front:build:production"
             },
             "development": {
-              "browserTarget": "ny_restaurants_front:build:development"
+              "buildTarget": "ny_restaurants_front:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -78,7 +78,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "ny_restaurants_front:build"
+            "buildTarget": "ny_restaurants_front:build"
           }
         },
         "test": {
