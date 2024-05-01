@@ -1,0 +1,11 @@
+<form [formGroup]="searchForm" (ngSubmit)="onSubmit()">
+  <div class="restaurant">
+    <label for="restaurant"></label>
+    <input type="number" name="restaurant" formControlName="restaurant">
+    @if (searchForm.get(restaurant).errors) {
+      <div class="error"></div>
+    }
+  </div>
+</form>
+
+<p>Hungrr !</p>
