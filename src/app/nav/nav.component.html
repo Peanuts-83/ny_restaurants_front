@@ -1,11 +1,17 @@
-<form [formGroup]="searchForm" (ngSubmit)="onSubmit()">
-  <div class="restaurant">
-    <label for="restaurant"></label>
-    <input type="number" name="restaurant" formControlName="restaurant">
-    @if (searchForm.get(restaurant).errors) {
-      <div class="error"></div>
-    }
+<form [formGroup]="form" (ngSubmit)="onSubmit()">
+  <div class="row restaurant">
+    <app-infinite-select name="restaurant" label="restaurant" [form]="form" [config]="restaurantConf"></app-infinite-select>
+  </div>
+  <div class="row borough">
+    <app-infinite-select #boroughSelect name="borough" label="borough" [form]="form" [config]="boroughConf">
+    </app-infinite-select>
+  </div>
+  <div class="row cuisine">
+    <app-infinite-select #cuisineSelect name="cuisine" label="cuisine" [form]="form" [config]="cuisineConf">
+    </app-infinite-select>
   </div>
 </form>
-
+<pre>{{form.get('restaurant')?.value|json}}</pre>
+<pre>{{form.get('borough')?.value|json}}</pre>
+<pre>{{form.get('cuisine')?.value|json}}</pre>
 <p>Hungrr !</p>

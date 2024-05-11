@@ -1,0 +1,37 @@
+.infinite-scroll-select {
+  position: relative;
+}
+
+.loader {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  width: 100%;
+}
+
+#searchInput {
+  position: absolute;
+  top: 2px;
+  z-index: 1;
+  opacity: 0;
+  font-size: 12px;
+  color: #666;
+  background-color: unset;
+  border: none;
+  border-bottom: 1px solid #666;
+  outline: none;
+  &.show {
+    opacity: 1;
+  }
+}
+
+mat-form-field {
+  mat-label {
+    opacity: 1;
+  }
+  &.hide-label {
+    mat-label {
+      opacity: 0;
+    }
+  }
+}
