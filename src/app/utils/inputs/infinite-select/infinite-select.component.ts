@@ -1,18 +1,22 @@
-import { control } from 'leaflet'
-import { Component, Input, OnDestroy, OnInit, ViewChild, forwardRef, ViewEncapsulation, Output, EventEmitter } from '@angular/core'
-import { FormBuilder, FormControl, FormGroup, NG_VALUE_ACCESSOR } from '@angular/forms'
+import { Component, Input, OnDestroy, OnInit, ViewChild, forwardRef, ViewEncapsulation, Injector } from '@angular/core'
+import { ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR, NgControl } from '@angular/forms'
 import { MatInput } from '@angular/material/input'
 import { MatSelect } from '@angular/material/select'
-import { Observable, Subscription, debounceTime, distinctUntilChanged, of, switchMap } from 'rxjs'
+import { Subscription, debounceTime, distinctUntilChanged, switchMap } from 'rxjs'
 import { FilterParams, SortParams } from 'src/app/models/filter-params.interface'
 import { InputConf } from 'src/app/models/input-conf.interface'
 import { InfiniteScrollService } from 'src/app/services/infinite-scroll.service'
 
 
-export interface BaseDistinct {
-  name: string
-}
-
+/**
+ * Custom Select input
+ *
+ * @property infiniteScroll:
+ * Loads <config.params.nbr> items each time the user scrolls close to the end of select panel.
+ *
+ * @property search items:
+ * Search text input is implemented and focused to on select opening. Text input value filters items with a new api query.
+ */
 @Component({
   selector: 'app-infinite-select',
   templateUrl: './infinite-select.component.html',
@@ -26,48 +30,68 @@ export interface BaseDistinct {
     }
   ]
 })
-export class InfiniteSelectComponent<T extends { name: string }> implements OnInit, OnDestroy {
-  public items!: T[]|null
+export class InfiniteSelectComponent<T extends { name: string }> implements OnInit, OnDestroy, ControlValueAccessor {
+  // select settings
+  public value: T | null = null
+  public control!: FormControl<T | null>
+  public items!: T[] | null
   public isLoading = false
   public opened: boolean = false
   private endScroll = false
-  @Input()
-  public formControl!: FormControl<T|null>
-  @Output()
-  formControlChange = new EventEmitter<FormControl<T|null>>()
 
   // search items
-  public searchItems!: T[]|null
+  public searchItems!: T[] | null
   searchControl = new FormControl(null)
-  searchRequest$!: Observable<T[]|null>
+  searchSub$!: Subscription
 
-  doSearch(a_event: Event) {
-    a_event.stopPropagation()
-  }
-
-  private subscriptions: Subscription[] = []
-
-  // InfiniteScroll settings
+  // infiniteScroll settings
   private nbr = 30
   private pageNbr = 1
-  private filters: FilterParams | null = null
+  private filters: FilterParams | undefined = undefined
   private sort: SortParams = { field: 'name', way: 1 }
 
+  constructor(private scrollService: InfiniteScrollService, private injector: Injector) { }
+
+  // ControlValueAccessor implementation //
+  onChange = (value: any) => { }
+  onTouched = () => { }
+  isDisabled = false
+
+  writeValue(obj: T | null): void {
+    this.value = obj
+  }
+  registerOnChange(fn: (value: any) => void): void {
+    this.onChange = fn
+  }
+  registerOnTouched(fn: any): void {
+    this.onTouched = fn
+  }
+  setDisabledState?(isDisabled: boolean): void {
+    this.isDisabled = isDisabled
+  }
+
+  // setup control form
+  ngAfterViewInit(): void {
+    const ngControl = this.injector.get(NgControl, null)
+    if (ngControl) {
+      setTimeout(() => this.control = Object.assign(new FormControl(), ngControl.control) as FormControl)
+    }
+  }
+
   @Input()
-  label!: string
-  @Input()
-  public form!: FormGroup
+  public label!: string
+
   @Input()
   public name!: string
 
   private _config!: InputConf
   /**
-   * Select config.
+   * Select config
    * @param service: ApiService.
    * @param params: AppHttpParams (nb/page_nbr/filters/sort)
    */
   @Input()
-  public set config(value: InputConf) {
+  set config(value: InputConf) {
     if (!value.params.nbr) {
       value.params.nbr = this.nbr
     }
@@ -76,7 +100,7 @@ export class InfiniteSelectComponent<T extends { name: string }> implements OnIn
     }
     this._config = value
   }
-  public get config(): InputConf {
+  get config(): InputConf {
     return this._config
   }
 
@@ -87,35 +111,21 @@ export class InfiniteSelectComponent<T extends { name: string }> implements OnIn
   @ViewChild(MatInput)
   searchInput!: MatInput
 
+
   ngOnInit(): void {
     // assign init values
     this.config.params['nbr'] = this.config.params.nbr || this.nbr
     this.config.params['page_nbr'] = this.config.params.page_nbr || this.pageNbr
     this.filters = this.config.params.filters || this.filters
     this.sort = this.config.params.sort || this.sort
-
     // search init
-    this.searchControl.valueChanges.pipe(
-      debounceTime(500),
-      distinctUntilChanged(),
-      switchMap((value: string|null) => {
-          return this.scrollService.doPost<T[]>(this.config.service.apiConf.baseApi, {
-            ...this.config.params,
-            filters: {
-              field: this.config.params.sort?.field!,
-              value: value || "",
-              operator_field: '$regex'
-            }
-          })
-      })
-    ).subscribe(result => {
-      this.searchItems = result
-    })
-
+    this.searchControl.disable()
+    this.doInitSearch()
     // get first items
     this.doInitItems()
   }
 
+  /** get <nbr> first items on load */
   doInitItems() {
     this.isLoading = true
     this.scrollService.doPost<T[]>(this.config.service.apiConf.baseApi, this.config.params)
@@ -127,6 +137,31 @@ export class InfiniteSelectComponent<T extends { name: string }> implements OnIn
         this.isLoading = false
       })
   }
+
+  /** get <nbr> search items on searchInput.valueChanges  */
+  doInitSearch() {
+    this.searchSub$ = this.searchControl.valueChanges.pipe(
+      debounceTime(500),
+      distinctUntilChanged(),
+      switchMap((value: string | null) => {
+        return this.scrollService.doPost<T[]>(this.config.service.apiConf.baseApi, {
+          ...this.config.params,
+          filters: {
+            field: this.config.params.sort?.field!,
+            value: value || "",
+            operator_field: '$regex'
+          }
+        })
+      })
+    ).subscribe(result => {
+      this.searchItems = result
+    })
+  }
+
+  ngOnDestroy(): void {
+    this.searchSub$.unsubscribe()
+  }
+
 
   /** Watch scroll event on opened event */
   onSwitch(a_opened: boolean): void {
@@ -142,22 +177,14 @@ export class InfiniteSelectComponent<T extends { name: string }> implements OnIn
   doSwitchSearchInput(a_show: boolean) {
     this.opened = a_show
     if (a_show) {
+      this.searchControl.enable()
       this.searchInput.focus()
     } else {
-      this.items = [...this.searchItems!]
-      this.searchInput.value = ""
-      this.searchItems = null
-      this.doInitItems()
+      this.searchControl.disable()
+      this.items = this.searchItems ? this.searchItems.slice() : this.items
     }
   }
 
-
-  /** Destroy eventListener */
-  ngOnDestroy(): void {
-    this.selectInput?.panel?.nativeElement.removeEventListener('scroll', this.onScroll.bind(this))
-  }
-
-  constructor(private scrollService: InfiniteScrollService, private fb: FormBuilder) { }
 
   /**
    * Fire api call when reaches end of items
@@ -167,26 +194,21 @@ export class InfiniteSelectComponent<T extends { name: string }> implements OnIn
     a_event.stopPropagation()
     if (!this.isLoading && !this.endScroll) {
       const l_select = a_event.target as HTMLElement
-      this.debugg = l_select.scrollTop + l_select.clientHeight >= l_select.scrollHeight / 1.1
-      if (l_select.scrollTop + l_select.clientHeight >= l_select.scrollHeight / 1.1) {
-        this.isLoading = true
-        this.scrollService.loadNext<T>(this.config, this.items!).subscribe(
-          result => {
-            setTimeout(() => {
-              if (result) {
-                this.items = this.items!.concat(result)
-                // no more api call if length < this.nbr
-                this.endScroll = result.length < this.nbr ? true : false
-              }
-              this.isLoading = false
-            }, 500
-            )
-          })
-      }
+      this.isLoading = true
+      this.scrollService.loadNext<T>(this.config, this.items!).subscribe(
+        result => {
+          setTimeout(() => {
+            if (result) {
+              this.items = this.items!.concat(result)
+              // no more api call if length < this.nbr
+              this.endScroll = result.length < this.nbr ? true : false
+            }
+            this.isLoading = false
+          }, 500
+          )
+        })
     }
   }
 
 
-  // to be removed
-  debugg: any
 }

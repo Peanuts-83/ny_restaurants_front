@@ -25,7 +25,6 @@ export class NavComponent implements OnInit {
   /**
    * Select configs
    */
-  // TODO: service restaurant > list (not distinct!)
   public restaurantConf: InputConf = { service: this.restaurantListService, params: { sort: { field: 'name', way: SortWay.ASC } }, formControl: 'restaurant' }
   public boroughConf: InputConf = { service: this.boroughDistinctService, params: { sort: { field: 'name', way: SortWay.ASC } }, formControl: 'borouhg' }
   public streetConf: InputConf = { service: this.restaurantDistinctService, params: { sort: { field: 'address.street', way: SortWay.ASC } }, formControl: 'street' }

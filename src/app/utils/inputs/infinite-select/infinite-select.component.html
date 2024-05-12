@@ -1,25 +1,27 @@
-<div class="infinite-scroll-select">
-    <input matInput #searchInput id="searchInput" [class.show]="opened" placeholder="Search" />
-  <mat-form-field [class.hide-label]="opened">
-    @if (isLoading) {
-      <div class="loader">
-        <mat-spinner diameter="20" strokeWidth="3"></mat-spinner>
-      </div>
-    }
-    <mat-label>{{label}}</mat-label>
-    <mat-select [formControl]="formControl" (valueChange)="formControlChange.emit(formControl)" (opened)="onSwitch(true)" (closed)="onSwitch(false)">
-      <mat-option>-</mat-option>
-      @if (!searchItems) {
-        @for (item of items; track $index;) {
-        <mat-option [value]="item">{{ item.name }}</mat-option>
+@if (control) {
+  <div class="infinite-scroll-select">
+      <input matInput #searchInput [formControl]="searchControl" id="searchInput" [class.show]="opened" placeholder="Search"/>
+    <mat-form-field [class.hide-label]="opened">
+      @if (isLoading) {
+        <div class="loader">
+          <mat-spinner diameter="20" strokeWidth="3"></mat-spinner>
+        </div>
       }
-    }
-    @if (searchItems) {
-      @for (item of searchItems; track $index;) {
+      <mat-label>{{label}}</mat-label>
+      <mat-select [formControl]="control" (selectionChange)="value=$event.value;onChange($event.value);" (opened)="onSwitch(true)" (closed)="onSwitch(false)">
+        <mat-option>-</mat-option>
+        @if (!searchItems) {
+          @for (item of items; track item.name;) {
           <mat-option [value]="item">{{ item.name }}</mat-option>
         }
       }
-    </mat-select>
-  </mat-form-field>
-  <pre>{{searchInput.value}}</pre>
-</div>
+      @if (searchItems) {
+        @for (item of searchItems; track $index;) {
+            <mat-option [value]="item">{{ item.name }}</mat-option>
+          }
+        }
+      </mat-select>
+    </mat-form-field>
+    <!-- <pre>{{searchInput.value}}</pre> -->
+  </div>
+}
