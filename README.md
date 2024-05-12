@@ -1,27 +1,21 @@
-# NyRestaurantsFront
+[![Angular](https://img.shields.io/badge/Code-Angular_17-info?logo=Angular&logoColor=white&color=ff0000)](https://angular.dev/)
+[![materialdesign](https://img.shields.io/badge/UI/UX-materialdesign-info?logo=materialdesign&logoColor=white&color=757575)](https://material.angular.io/)
+[![Leaflet](https://img.shields.io/badge/Map-Leaflet-info?logo=Leaflet&logoColor=white&color=199900)](https://leafletjs.com/)
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 16.1.5.
+# Ny Restaurants (front-end) - HUNGRR!!!
 
-## Development server
+HUNGRR!!! is a single page application made with Angular 17. It's designed to give access to a map of Newyork City, where the user could find restaurants around him.
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+Some forms allow filtering and search for restaurant name, cuisine type, borough and other values.
 
-## Code scaffolding
+Back-end part of this app is [NyRestaurantsAPI](https://github.com/Peanuts-83/ny_restaurants_api). The database used in this project is outdated, most restaurants references are no more valid values. For dev practice only, main purpose being to manage a full stack project with API definition, database managment and UI/UX development.
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+wip...
 
-## Build
+## TODO:
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
-
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+* UI interface with base map and base nav/filter form
+* UX reactive form with logic (infiniteScroll component, search field incorporated)
+* UI/UX map fine tuning (map marker, info display, rectangle map coords)
+* UX form final fixes
+* UI Homepage and animation
