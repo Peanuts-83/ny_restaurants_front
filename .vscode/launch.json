@@ -3,11 +3,35 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "ng serve",
+    "console": "integratedTerminal",
+    "internalConsoleOptions": "neverOpen",
+    "name": "nodemon",
+    "program": "${workspaceFolder}",
+    "request": "launch",
+    "restart": true,
+    "runtimeExecutable": "nodemon",
+    "skipFiles": [
+      "<node_internals>/**"
+    ],
+    "type": "node",
+    "runtimeVersion": "20.5.1"
+  },
+    {
+      "name": "ng serve Firefox",
+      "type": "firefox",
+      "request": "launch",
+      "reAttach": true,
+      "preLaunchTask": "npm: start",
+      "url": "http://localhost:4200/",
+      "webRoot": "${workspaceFolder}"
+    },
+    {
+      "name": "ng serve Chrome",
       "type": "chrome",
       "request": "launch",
       "preLaunchTask": "npm: start",
-      "url": "http://localhost:4200/"
+      "url": "http://localhost:8080/",
+      "webRoot": "${workspaceFolder}"
     },
     {
       "name": "ng test",

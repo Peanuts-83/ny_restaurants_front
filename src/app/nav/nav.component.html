@@ -1,13 +1,13 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()">
   <div class="row restaurant">
-    <app-infinite-select name="restaurant" label="restaurant" [form]="form" [config]="restaurantConf"></app-infinite-select>
+    <app-infinite-select name="restaurant" label="restaurant" [(formControl)]="restaurantControl" [form]="form" [config]="restaurantConf"></app-infinite-select>
   </div>
   <div class="row borough">
-    <app-infinite-select #boroughSelect name="borough" label="borough" [form]="form" [config]="boroughConf">
+    <app-infinite-select #boroughSelect name="borough" label="borough" [formControl]="boroughControl" [form]="form" [config]="boroughConf">
     </app-infinite-select>
   </div>
   <div class="row cuisine">
-    <app-infinite-select #cuisineSelect name="cuisine" label="cuisine" [form]="form" [config]="cuisineConf">
+    <app-infinite-select #cuisineSelect name="cuisine" label="cuisine" [formControl]="cuisineControl" [form]="form" [config]="cuisineConf">
     </app-infinite-select>
   </div>
 </form>
