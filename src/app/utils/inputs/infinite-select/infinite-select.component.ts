@@ -2,7 +2,8 @@ import { Component, Input, OnDestroy, OnInit, ViewChild, forwardRef, ViewEncapsu
 import { ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR, NgControl } from '@angular/forms'
 import { MatInput } from '@angular/material/input'
 import { MatSelect } from '@angular/material/select'
-import { Subscription, debounceTime, distinctUntilChanged, switchMap } from 'rxjs'
+import { resourceUsage } from 'process'
+import { BehaviorSubject, Subscription, debounceTime, distinctUntilChanged, of, switchMap } from 'rxjs'
 import { FilterParams, SortParams } from 'src/app/models/filter-params.interface'
 import { InputConf } from 'src/app/models/input-conf.interface'
 import { InfiniteScrollService } from 'src/app/services/infinite-scroll.service'
@@ -30,7 +31,7 @@ import { InfiniteScrollService } from 'src/app/services/infinite-scroll.service'
     }
   ]
 })
-export class InfiniteSelectComponent<T extends { name: string }> implements OnInit, OnDestroy, ControlValueAccessor {
+export class InfiniteSelectComponent<T extends { name: string, borough?: string }> implements OnInit, OnDestroy, ControlValueAccessor {
   // select settings
   public value: T | null = null
   public control!: FormControl<T | null>
@@ -40,15 +41,15 @@ export class InfiniteSelectComponent<T extends { name: string }> implements OnIn
   private endScroll = false
 
   // search items
-  public searchItems!: T[] | null
   searchControl = new FormControl(null)
+  subscriptions: Subscription[] = []
   searchSub$!: Subscription
 
   // infiniteScroll settings
-  private nbr = 30
-  private pageNbr = 1
-  private filters: FilterParams | undefined = undefined
-  private sort: SortParams = { field: 'name', way: 1 }
+  private nbr = new BehaviorSubject<number>(30)
+  private pageNbr = new BehaviorSubject<number>(1)
+  private filters = new BehaviorSubject<FilterParams | undefined>(undefined)
+  private sort = new BehaviorSubject<SortParams | undefined>({ field: 'name', way: 1 })
 
   constructor(private scrollService: InfiniteScrollService, private injector: Injector) { }
 
@@ -92,13 +93,19 @@ export class InfiniteSelectComponent<T extends { name: string }> implements OnIn
    */
   @Input()
   set config(value: InputConf) {
-    if (!value.params.nbr) {
-      value.params.nbr = this.nbr
-    }
-    if (!value.params.page_nbr) {
-      value.params.page_nbr = this.pageNbr
-    }
     this._config = value
+    if (this.config.params.nbr) {
+      this.nbr.next(this.config.params.nbr)
+    }
+    if (this.config.params.page_nbr) {
+      this.pageNbr.next(this.config.params.page_nbr)
+    }
+    if (this.config.params.filters) {
+      this.filters.next(this.config.params.filters)
+    }
+    if (this.config.params.sort) {
+      this.sort.next(this.config.params.sort)
+    }
   }
   get config(): InputConf {
     return this._config
@@ -113,11 +120,12 @@ export class InfiniteSelectComponent<T extends { name: string }> implements OnIn
 
 
   ngOnInit(): void {
-    // assign init values
-    this.config.params['nbr'] = this.config.params.nbr || this.nbr
-    this.config.params['page_nbr'] = this.config.params.page_nbr || this.pageNbr
-    this.filters = this.config.params.filters || this.filters
-    this.sort = this.config.params.sort || this.sort
+    this.subscriptions.concat([
+      this.nbr.subscribe(result => this.config.params.nbr = result),
+      this.pageNbr.subscribe(result => this.config.params.page_nbr = result),
+      this.filters.subscribe(result => this.config.params.filters = result),
+      this.sort.subscribe(result => this.config.params.sort = result)
+    ])
     // search init
     this.searchControl.disable()
     this.doInitSearch()
@@ -130,12 +138,24 @@ export class InfiniteSelectComponent<T extends { name: string }> implements OnIn
     this.isLoading = true
     this.scrollService.doPost<T[]>(this.config.service.apiConf.baseApi, this.config.params)
       .subscribe(result => {
-        if (result) {
+        if (result && result.length > 0) {
           this.items = result
-          this.endScroll = result.length < this.nbr ? true : false
+          if (result.length < this.nbr.value) {
+            this.endScroll = true
+          } else {
+            this.endScroll = false
+            this.pageNbr.next(this.pageNbr.value + 1)
+          }
+        } else {
+          this.endScroll = true
         }
         this.isLoading = false
       })
+  }
+
+  private _unsetControl() {
+    this.control.setValue(null)
+    this.onChange(null)
   }
 
   /** get <nbr> search items on searchInput.valueChanges  */
@@ -144,17 +164,28 @@ export class InfiniteSelectComponent<T extends { name: string }> implements OnIn
       debounceTime(500),
       distinctUntilChanged(),
       switchMap((value: string | null) => {
-        return this.scrollService.doPost<T[]>(this.config.service.apiConf.baseApi, {
-          ...this.config.params,
-          filters: {
+        this._unsetControl()
+        if (value && value.length > 0) {
+          this.filters.next({
             field: this.config.params.sort?.field!,
             value: value || "",
             operator_field: '$regex'
-          }
-        })
+          })
+          this.pageNbr.next(1)
+          return this.scrollService.doPost<T[]>(this.config.service.apiConf.baseApi, this.config.params)
+        }
+        return of(null)
       })
     ).subscribe(result => {
-      this.searchItems = result
+      if (result !== null) {
+        this.items = result
+      } else if (this.filters.value) {
+        // back to items without search filter
+        this.filters.next(undefined)
+        this.pageNbr.next(1)
+        this._unsetControl()
+        this.doInitItems()
+      }
     })
   }
 
@@ -162,14 +193,13 @@ export class InfiniteSelectComponent<T extends { name: string }> implements OnIn
     this.searchSub$.unsubscribe()
   }
 
-
   /** Watch scroll event on opened event */
   onSwitch(a_opened: boolean): void {
     if (a_opened) {
-      this.doSwitchSearchInput(a_opened)
+      this.doSwitchSearchInput(a_opened) // true
       this.selectInput.panel.nativeElement.addEventListener('scroll', this.onScroll.bind(this))
     } else {
-      this.doSwitchSearchInput(a_opened)
+      this.doSwitchSearchInput(a_opened) // false
     }
   }
 
@@ -181,7 +211,6 @@ export class InfiniteSelectComponent<T extends { name: string }> implements OnIn
       this.searchInput.focus()
     } else {
       this.searchControl.disable()
-      this.items = this.searchItems ? this.searchItems.slice() : this.items
     }
   }
 
@@ -192,20 +221,23 @@ export class InfiniteSelectComponent<T extends { name: string }> implements OnIn
    */
   public onScroll(a_event: Event) {
     a_event.stopPropagation()
-    if (!this.isLoading && !this.endScroll) {
-      const l_select = a_event.target as HTMLElement
+    const l_select = a_event.target as HTMLElement
+    // Check for scroll at the end of items list
+    if (!this.isLoading && !this.endScroll && (l_select.scrollTop + l_select.clientHeight >= l_select.scrollHeight / 1.1)) {
       this.isLoading = true
       this.scrollService.loadNext<T>(this.config, this.items!).subscribe(
-        result => {
-          setTimeout(() => {
-            if (result) {
-              this.items = this.items!.concat(result)
-              // no more api call if length < this.nbr
-              this.endScroll = result.length < this.nbr ? true : false
+        (result: T[]) => {
+          if (result) {
+            this.items = this.items!.concat(result)
+            // no more api call if length < this.nbr
+            if (result.length < this.nbr.value) {
+              this.endScroll = true
+            } else {
+              this.endScroll = false
+              this.pageNbr.next(this.pageNbr.value + 1)
             }
-            this.isLoading = false
-          }, 500
-          )
+          }
+          this.isLoading = false
         })
     }
   }
