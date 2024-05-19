@@ -13,6 +13,6 @@ import { API } from "src/app/services/http.service"
   providedIn: 'root'
 })
 export class BoroughDistinctService extends BaseApiService {
-  public override apiConf = { baseApi: API.Neighborhood.BRH_DISTINCT }
+  public override apiConf = { baseApi: API.NeighborhoodApi.BRH_DISTINCT }
 
 }

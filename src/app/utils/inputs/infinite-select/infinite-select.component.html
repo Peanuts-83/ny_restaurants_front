@@ -1,5 +1,5 @@
 @if (control) {
-<div class="infinite-scroll-select">
+<div class="infinite-scroll-select" >
   <input matInput #searchInput [formControl]="searchControl" id="searchInput" [class.show]="opened"
     placeholder="Search" />
   <mat-form-field [class.hide-label]="opened">
@@ -9,7 +9,7 @@
     </div>
     }
     <mat-label>{{label}}</mat-label>
-    <mat-select [formControl]="control" (selectionChange)="value=$event.value;onChange($event.value);" (opened)="onSwitch(true)" (closed)="onSwitch(false)">
+    <mat-select [formControl]="control" [compareWith]="compareControlValues" (selectionChange)="value=$event.value;onChange($event.value)" (openedChange)="onSwitch($event)" >
       <mat-option>-</mat-option>
       @for (item of items; track $index;) {
       <mat-option [value]="item">

@@ -6,7 +6,7 @@ import { API } from "src/app/services/http.service"
   providedIn: 'root'
 })
 export class RestaurantListService extends BaseApiService {
-  public override apiConf = { baseApi: API.Restaurant.LIST }
+  public override apiConf = { baseApi: API.RestaurantApi.LIST }
 
 
 }

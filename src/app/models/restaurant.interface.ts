@@ -1,6 +1,6 @@
 import { Distinct } from "./distinct.interface"
 
-export interface RestaurantList extends Distinct {
+export interface Restaurant extends Distinct {
   address: Address
   borough:string
   cuisine:string

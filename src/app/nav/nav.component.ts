@@ -5,7 +5,7 @@ import { InputConf } from '../models/input-conf.interface'
 import { BoroughDistinctService } from './services/borough-distinct.service'
 import { RestaurantDistinctService } from './services/restaurant-distinct.service'
 import { RestaurantListService } from './services/restaurant-list.service'
-import { RestaurantList } from '../models/restaurant.interface'
+import { Restaurant } from '../models/restaurant.interface'
 import { Distinct } from '../models/distinct.interface'
 
 @Component({
@@ -15,7 +15,7 @@ import { Distinct } from '../models/distinct.interface'
 })
 export class NavComponent implements OnInit {
   public form!: FormGroup
-  restaurantControl = new FormControl<RestaurantList|null>(null)
+  restaurantControl = new FormControl<Restaurant|null>(null)
   boroughControl = new FormControl<Distinct|null>(null)
   streetControl = new FormControl<any|null>(null)
   distanceControl = new FormControl<number|null>(null, Validators.pattern('^[0-9]+$'))
@@ -26,7 +26,7 @@ export class NavComponent implements OnInit {
    * Select configs
    */
   public restaurantConf: InputConf = { service: this.restaurantListService, params: { sort: { field: 'name', way: SortWay.ASC } }, formControl: 'restaurant' }
-  public boroughConf: InputConf = { service: this.boroughDistinctService, params: { sort: { field: 'name', way: SortWay.ASC } }, formControl: 'borouhg' }
+  public boroughConf: InputConf = { service: this.restaurantDistinctService, params: { sort: { field: 'borough', way: SortWay.ASC } }, formControl: 'borough' }
   public streetConf: InputConf = { service: this.restaurantDistinctService, params: { sort: { field: 'address.street', way: SortWay.ASC } }, formControl: 'street' }
   public cuisineConf: InputConf = { service: this.restaurantDistinctService, params: { sort: { field: 'cuisine', way: SortWay.ASC } }, formControl: 'cuisine' }
 
@@ -40,6 +40,16 @@ export class NavComponent implements OnInit {
       distance: this.distanceControl, // depuis la position de user
       cuisine: this.cuisineControl,
       grades: this.gradesControl // from A to F... to Z (Others)
+    })
+    this.form.get('restaurant')!.valueChanges.subscribe(control => {
+      // console.log(control)
+      if (control!==null) {
+        this.form.patchValue({
+          borough: {name: control.borough},
+          street: {name: control.address.street},
+          cuisine: {name: control.cuisine},
+        })
+      }
     })
   }
 

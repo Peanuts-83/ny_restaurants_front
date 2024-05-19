@@ -3,7 +3,7 @@ import { HttpService } from "./http.service"
 import { AppHttpParams } from "../models/filter-params.interface"
 import { Observable } from "rxjs"
 
-@Injectable()
+@Injectable({providedIn:'root'})
 export abstract class BaseApiService {
   public abstract apiConf: { baseApi: string }
 

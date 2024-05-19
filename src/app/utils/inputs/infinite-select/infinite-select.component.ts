@@ -1,11 +1,13 @@
 import { Component, Input, OnDestroy, OnInit, ViewChild, forwardRef, ViewEncapsulation, Injector } from '@angular/core'
-import { ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR, NgControl } from '@angular/forms'
+import { ControlValueAccessor, FormControl, FormGroup, NG_VALUE_ACCESSOR, NgControl } from '@angular/forms'
 import { MatInput } from '@angular/material/input'
 import { MatSelect } from '@angular/material/select'
 import { resourceUsage } from 'process'
-import { BehaviorSubject, Subscription, debounceTime, distinctUntilChanged, of, switchMap } from 'rxjs'
+import { BehaviorSubject, Subscription, debounceTime, distinctUntilChanged, firstValueFrom, of, switchMap } from 'rxjs'
 import { FilterParams, SortParams } from 'src/app/models/filter-params.interface'
 import { InputConf } from 'src/app/models/input-conf.interface'
+import { BaseApiService } from 'src/app/services/base-api.service'
+import { API, OPERATOR } from 'src/app/services/http.service'
 import { InfiniteScrollService } from 'src/app/services/infinite-scroll.service'
 
 
@@ -31,7 +33,7 @@ import { InfiniteScrollService } from 'src/app/services/infinite-scroll.service'
     }
   ]
 })
-export class InfiniteSelectComponent<T extends { name: string, borough?: string }> implements OnInit, OnDestroy, ControlValueAccessor {
+export class InfiniteSelectComponent<T extends { name: string, borough?: string, [key: string]: any }> implements OnInit, OnDestroy, ControlValueAccessor {
   // select settings
   public value: T | null = null
   public control!: FormControl<T | null>
@@ -39,6 +41,9 @@ export class InfiniteSelectComponent<T extends { name: string, borough?: string 
   public isLoading = false
   public opened: boolean = false
   private endScroll = false
+
+  @Input()
+  parentForm!: FormGroup
 
   // search items
   searchControl = new FormControl(null)
@@ -51,15 +56,28 @@ export class InfiniteSelectComponent<T extends { name: string, borough?: string 
   private filters = new BehaviorSubject<FilterParams | undefined>(undefined)
   private sort = new BehaviorSubject<SortParams | undefined>({ field: 'name', way: 1 })
 
-  constructor(private scrollService: InfiniteScrollService, private injector: Injector) { }
+  constructor(private scrollService: InfiniteScrollService, private injector: Injector, private apiService: BaseApiService) { }
 
   // ControlValueAccessor implementation //
   onChange = (value: any) => { }
   onTouched = () => { }
   isDisabled = false
 
+  // write value programatically
   writeValue(obj: T | null): void {
-    this.value = obj
+    if (this.control && this.control.value !== obj) {
+      if (obj!==null && !this.items?.some(item => Object.keys(obj).every(k => obj[k]===item[k]))) {
+        this.items?.push(obj)
+      }
+      this.control.setValue(obj, { emitEvent: false })
+      this.control.markAsDirty()
+    } else {
+      this.value = obj
+    }
+  }
+  // Validate value from items list
+  compareControlValues(obj1: any, obj2: any): boolean {
+    return obj1 && obj2 && Object.keys(obj1).every(k => obj1[k] === obj2[k])
   }
   registerOnChange(fn: (value: any) => void): void {
     this.onChange = fn
@@ -83,7 +101,7 @@ export class InfiniteSelectComponent<T extends { name: string, borough?: string 
   public label!: string
 
   @Input()
-  public name!: string
+  public formControlName!: string
 
   private _config!: InputConf
   /**
@@ -120,6 +138,7 @@ export class InfiniteSelectComponent<T extends { name: string, borough?: string 
 
 
   ngOnInit(): void {
+    // update config.params on params
     this.subscriptions.concat([
       this.nbr.subscribe(result => this.config.params.nbr = result),
       this.pageNbr.subscribe(result => this.config.params.page_nbr = result),
