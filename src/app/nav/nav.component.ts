@@ -1,5 +1,5 @@
 import { SortWay } from './../models/filter-params.interface'
-import { Component, OnInit } from '@angular/core'
+import { Component, EventEmitter, OnInit, Output } from '@angular/core'
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { InputConf } from '../models/input-conf.interface'
 import { BoroughDistinctService } from './services/borough-distinct.service'
@@ -42,7 +42,7 @@ export class NavComponent implements OnInit {
       grades: this.gradesControl // from A to F... to Z (Others)
     })
     this.form.get('restaurant')!.valueChanges.subscribe(control => {
-      // console.log(control)
+      this.onRestaurantChange.emit(this.form.get('restaurant')!.value)
       if (control!==null) {
         this.form.patchValue({
           borough: {name: control.borough},
@@ -52,6 +52,8 @@ export class NavComponent implements OnInit {
       }
     })
   }
+
+  @Output() onRestaurantChange = new EventEmitter<Restaurant>()
 
   public onSubmit() {
 

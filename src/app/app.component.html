@@ -1,2 +1,2 @@
-<app-nav></app-nav>
-<app-map></app-map>
+<app-nav (onRestaurantChange)="restaurant=$event"></app-nav>
+<app-map [restaurant]="restaurant"></app-map>

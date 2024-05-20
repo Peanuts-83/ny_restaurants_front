@@ -1,5 +1,5 @@
 import { ElementRef, Injectable } from '@angular/core';
-import { Browser, LatLng, Map, control, map, tileLayer } from 'leaflet'
+import { Browser, LatLng, Map, Marker, control, icon, latLng, map, marker, tileLayer } from 'leaflet'
 import { BehaviorSubject } from 'rxjs'
 import {environment} from 'src/environments/environment'
 
@@ -15,7 +15,20 @@ export class MapService {
 
   public leafletMap$!:BehaviorSubject<Map>
 
-  constructor() { }
+  constructor() {
+    // setup marker icon
+    const iconDefault = icon({
+      iconUrl:'../assets/leaflet/marker-icon-2x.png',
+      shadowUrl:'assets/leaflet/marker-shadow.png',
+      iconSize:[38,60],
+      iconAnchor:[20,60],
+      shadowSize:[50,64],
+      shadowAnchor:[15,64],
+      popupAnchor: [0, -60],
+      tooltipAnchor:[0,0]
+    })
+    Marker.prototype.options.icon = iconDefault
+   }
 
   /**
    * Crée la map dans un BehaviourSubject et l'assigne au container providé.
@@ -47,7 +60,14 @@ export class MapService {
 
     // center on Manhattan
     l_map.setView(new LatLng(40.765744828087435, -73.97910823752092), 15)
-
+    // marker([-73.97659247747508,40.76520575809608]).addTo(l_map)
     this.leafletMap$ = new BehaviorSubject(l_map)
+  }
+
+  coordToLeaflet(coord:number[]): LatLng {
+    if (coord.length!==2) {
+      return latLng(0,0)
+    }
+    return latLng(coord[1], coord[0])
   }
 }
