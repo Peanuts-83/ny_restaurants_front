@@ -59,8 +59,7 @@ export class MapService {
     control.zoom({position: 'bottomright'}).addTo(l_map)
 
     // center on Manhattan
-    l_map.setView(new LatLng(40.765744828087435, -73.97910823752092), 15)
-    // marker([-73.97659247747508,40.76520575809608]).addTo(l_map)
+    l_map.setView(this.coordToLeaflet([-73.97910823752092, 40.765744828087435]), 15)
     this.leafletMap$ = new BehaviorSubject(l_map)
   }
 
