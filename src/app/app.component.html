@@ -1,2 +1,6 @@
-<app-nav (onRestaurantChange)="restaurant=$event"></app-nav>
+<app-nav
+  (onRestaurantChange)="restaurant=$event"
+  (onToggleNav)="showNav=!showNav"
+  [ngClass]="{hide:!showNav}"
+  ></app-nav>
 <app-map [restaurant]="restaurant"></app-map>

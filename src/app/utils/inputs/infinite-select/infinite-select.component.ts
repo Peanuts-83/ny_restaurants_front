@@ -1,4 +1,4 @@
-import { Component, Input, OnDestroy, OnInit, ViewChild, forwardRef, ViewEncapsulation, Injector } from '@angular/core'
+import { Component, Input, OnDestroy, OnInit, ViewChild, forwardRef, ViewEncapsulation, Injector, Output, EventEmitter } from '@angular/core'
 import { ControlValueAccessor, FormControl, FormGroup, NG_VALUE_ACCESSOR, NgControl } from '@angular/forms'
 import { MatInput } from '@angular/material/input'
 import { MatSelect } from '@angular/material/select'
@@ -58,8 +58,12 @@ export class InfiniteSelectComponent<T extends { name: string, borough?: string,
 
   constructor(private scrollService: InfiniteScrollService, private injector: Injector, private apiService: BaseApiService) { }
 
+  @Output() onChangeValue = new EventEmitter()
+
   // ControlValueAccessor implementation //
-  onChange = (value: any) => { }
+  onChange = (value: any) => {
+    this.onChangeValue.emit(value)
+  }
   onTouched = () => { }
   isDisabled = false
 

@@ -1,1 +1,11 @@
 <div #mapContainer class="map-container"></div>
+
+<ng-template #popupTemplate let-restaurant="restaurant">
+  <div class='markerPopup'>
+    <h3>{{ restaurant.name }}</h3>
+    <div class='cuisine'>{{ restaurant.cuisine }}</div>
+    <div class='score'><i class="fa-solid fa-star"></i><span>{{ restaurant.grades | json }}</span></div>
+    <div>{{ restaurant.address.building }} - {{ restaurant.address.street }}</div>
+    <div class='borough'>{{ restaurant.borough }}</div>
+  </div>
+</ng-template>

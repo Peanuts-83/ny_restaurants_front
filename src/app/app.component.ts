@@ -11,4 +11,6 @@ export class AppComponent {
   title = 'Hungrr';
 
   public restaurant!:Restaurant
+
+  public showNav = true
 }

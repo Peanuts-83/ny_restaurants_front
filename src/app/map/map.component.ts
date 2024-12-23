@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, Input, OnDestroy, TemplateRef, ViewChild, ViewEncapsulation } from '@angular/core'
+import { AfterViewInit, Component, ElementRef, Input, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, ViewEncapsulation } from '@angular/core'
 import { MapService } from '../services/map.service'
 import { LatLng, Map, Marker, marker } from 'leaflet'
 import { Subscription } from 'rxjs'
@@ -17,7 +17,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   public oneMarker = true
 
 
-  constructor(private mapService: MapService) { }
+  constructor(private mapService: MapService, private viewContainerRef:ViewContainerRef) { }
 
   @ViewChild('mapContainer')
   mapContainer!: ElementRef<HTMLElement>
@@ -43,12 +43,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.createMarker(this.mapService.coordToLeaflet(a_value.address.coord),
     {
       tooltipContent: a_value.name,
-        popupContent: `<div class='markerPopup'>\
-      <h3>${a_value?.name }</h3>\
-      <div class='cuisine'>${a_value.cuisine}</div>\
-      <div class='score'><i class="fa-solid fa-star"></i><span>${l_grades.join(' - ')}</span></div>\
-      <div>${a_value.address.building} - ${a_value.address.street}</div>\
-      <div class='borough'>${a_value.borough}</div>\
+        popupContent:
+        `<div class='markerPopup'>
+      <h3>${a_value.name }</h3>
+      <div class='cuisine'>${a_value.cuisine}</div>
+      <div class='score'><i class="fa-solid fa-star"></i><span>${l_grades.join(' - ')}</span></div>
+      <div>${a_value.address.building} - ${a_value.address.street}</div>
+      <div class='borough'>${a_value.borough}</div>
     </div>`
     })
     this.map.setView(this.mapService.coordToLeaflet(a_value.address.coord), 16)
@@ -67,14 +68,12 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   public removeMarker(a_marker?: Marker) {
     if (!a_marker) {
       // remove all markers
-      this._markers.forEach(marker => this.map.removeLayer(marker))
+      this._markers?.forEach(marker => this.map.removeLayer(marker))
       this._markers = []
-      return
     } else {
       // remove one marker
       this.map.removeLayer(a_marker)
-      this._markers = this._markers.filter(marker => marker.getLatLng() === a_marker.getLatLng())
-      return
+      this._markers = this._markers?.filter(marker => marker.getLatLng() === a_marker.getLatLng())
     }
   }
 }

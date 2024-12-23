@@ -1,4 +1,25 @@
 /* You can add global styles to this file, and also import other style files */
 
-html, body { height: 100%; }
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+}
+
+app-root {
+  position: relative;
+}
+
+app-nav {
+  position: sticky;
+  top: 0;
+  transition: .5s ease-in;
+
+  &.hide {
+    top: -200px;
+  }
+}
