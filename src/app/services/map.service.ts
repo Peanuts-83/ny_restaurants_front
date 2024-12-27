@@ -13,6 +13,9 @@ export class MapService {
     zoom:10
   }
 
+  public target = new BehaviorSubject<Marker|undefined>(undefined)
+  public targetHalo = new BehaviorSubject<number>(200)
+
   public leafletMap$!:BehaviorSubject<Map>
 
   constructor() {
@@ -54,6 +57,13 @@ export class MapService {
       maxZoom: 20,
       id: 'osm-bright'}).addTo(l_map)
 
+      // map scale
+      control.scale({
+        position: 'bottomright',
+        metric: true,
+        imperial: false,
+        maxWidth: 200
+      }).addTo(l_map)
     // Controls en bas a droite
     l_map.zoomControl.remove()
     control.zoom({position: 'bottomright'}).addTo(l_map)

@@ -1,33 +1,48 @@
 <form class="nav-form row" [formGroup]="form" (ngSubmit)="onSubmit()">
-  <div class="col restaurant">
-    <app-infinite-select #restaurantSelect label="restaurant" formControlName="restaurant"
-      [config]="restaurantConf"></app-infinite-select>
-  </div>
-  <div class="col distincts">
-  <div class="row">
-    <div class="col cuisine">
-      <app-infinite-select #cuisineSelect label="cuisine" formControlName="cuisine" (onChangeValue)="onChangeSelectValue($event)" [config]="cuisineConf">
-      </app-infinite-select>
-    </div>
-    <div class="col grade">
-      <input #gradeInput label="Grades" placeholder="Grades" formControlName="grades"/>
-    </div>
-  </div>
+  <div class="row container">
     <div class="row">
-      <div class="col borough">
-        <app-infinite-select #boroughSelect label="borough" formControlName="borough"  [config]="boroughConf"></app-infinite-select>
+      <div class="col restaurant">
+        <app-infinite-select #restaurantSelect label="restaurant" formControlName="restaurant"
+          [config]="restaurantConf" (onChangeValue)="onChangeSelectValue($event, 'restaurant')"></app-infinite-select>
       </div>
-      <div class="col street">
-        <app-infinite-select #streetSelect label="street" formControlName="street" [config]="streetConf"></app-infinite-select>
+      <div class="col grade">
+        <!-- <mat-slider min="1" max="6" step="6" #gradeInput label="Grades" placeholder="Grades" formControlName="grades" /> -->
       </div>
       <div class="col distance">
-        <input #distanceInput label="distance" placeholder="Distance" type="number" formControlName="distance">
+        <label class="dist-label" for="distanceInput">near {{distanceInput.value}}m.</label>
+        <mat-slider min="50" max="3050" step="150" showTickMarks label="distance" placeholder="Distance" type="number" disabled #distanceSlider>
+          <input matSliderThumb #distanceInput (valueChange)="onChangeSelectValue($event, 'distance')" formControlName="distance">
+        </mat-slider>
       </div>
+
     </div>
 
+    <div class="row distincts">
+      <div class="col cuisine">
+        <app-infinite-select #cuisineSelect label="cuisine" formControlName="cuisine"
+          (onChangeValue)="onChangeSelectValue($event, 'cuisine')" [config]="cuisineConf">
+        </app-infinite-select>
+      </div>
+      <div class="col borough">
+        <app-infinite-select #boroughSelect label="borough" formControlName="borough" (onChangeValue)="onChangeSelectValue($event, 'borough')"
+          [config]="boroughConf"></app-infinite-select>
+      </div>
+      <div class="col street">
+        <app-infinite-select #streetSelect label="street" formControlName="street" (onChangeValue)="onChangeSelectValue($event, 'street')"
+          [config]="streetConf"></app-infinite-select>
+      </div>
+    </div>
   </div>
+
 </form>
 <!-- <pre>{{form.get('restaurant')?.value|json}}</pre>
 <pre>{{form.get('borough')?.value|json}}</pre>
 <pre>{{form.get('cuisine')?.value|json}}</pre> -->
-<p class="nav-btn" (click)="toggleNav($event)">Hungrr !</p>
+<div class="bottom-nav">
+  <div class="nav-toggle" (click)="toggleNav($event)">
+    <div class="hulk">
+      <img src="assets/img/pngegg.png" alt="hulk-face">
+      <div class="title">Hungrr</div>
+    </div>
+  </div>
+</div>
