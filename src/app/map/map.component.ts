@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, ElementRef, Input, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, ViewEncapsulation } from '@angular/core'
 import { MapService } from '../services/map.service'
-import { divIcon, LatLng, LeafletMouseEvent, Map, Marker, marker, latLng, icon, control, circle, Circle, tileLayer, gridLayer } from 'leaflet'
+import { LatLng, LeafletMouseEvent, Map, Marker, marker, icon, circle, Circle } from 'leaflet'
 import { Subscription } from 'rxjs'
 import { Restaurant } from '../models/restaurant.interface'
 
@@ -48,6 +48,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       if (result) {
         this.haloMarker?.setRadius(result)
         this.haloMarker?.addTo(this.map)
+        if (!this.restaurantValue) {
+          //load all restaurants in halo zone matching restaurantListService.listParams
+        }
       }
     }))
     // initial marker for test

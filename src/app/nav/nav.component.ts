@@ -1,6 +1,6 @@
 import { InfiniteSelectComponent } from './../utils/inputs/infinite-select/infinite-select.component'
-import { OpField, SingleFilter, SortWay } from './../models/filter-params.interface'
-import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, viewChild } from '@angular/core'
+import { SortWay } from './../models/filter-params.interface'
+import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core'
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { InputConf } from '../models/input-conf.interface'
 import { BoroughDistinctService } from './services/borough-distinct.service'
@@ -12,7 +12,6 @@ import { MapService } from '../services/map.service'
 import { MatSlider } from '@angular/material/slider'
 import { Marker } from 'leaflet'
 import { Subscription } from 'rxjs'
-import { InfiniteScrollService } from '../services/infinite-scroll.service'
 import { HttpService } from '../services/http.service'
 
 @Component({
@@ -35,7 +34,7 @@ export class NavComponent implements OnInit, OnDestroy, AfterViewInit {
   /**
    * Select configs
    */
-  public restaurantConf: InputConf = { service: this.restaurantListService, params: { sort: { field: 'name', way: SortWay.ASC } }, formControl: 'restaurant' }
+  public restaurantConf: InputConf = { service: this.restaurantListService, params: this.restaurantListService.listParams.value /**{ sort: { field: 'name', way: SortWay.ASC } }*/, formControl: 'restaurant' }
   public boroughConf: InputConf = { service: this.restaurantDistinctService, params: { sort: { field: 'borough', way: SortWay.ASC } }, formControl: 'borough' }
   public streetConf: InputConf = { service: this.restaurantDistinctService, params: { sort: { field: 'address.street', way: SortWay.ASC } }, formControl: 'street' }
   public cuisineConf: InputConf = { service: this.restaurantDistinctService, params: { sort: { field: 'cuisine', way: SortWay.ASC } }, formControl: 'cuisine' }
@@ -51,6 +50,9 @@ export class NavComponent implements OnInit, OnDestroy, AfterViewInit {
           this.distanceSlider.disabled = true
         }
       }
+    }))
+    this.subs.push(this.restaurantListService.listParams.subscribe(result => {
+      this.restaurantConf.params = result
     }))
   }
 
@@ -103,15 +105,15 @@ export class NavComponent implements OnInit, OnDestroy, AfterViewInit {
       this.form.get('restaurant')?.setValue(null)
       if (this.target) {
         this.distanceSlider.disabled = false
+        this.mapService.targetHalo.next(this.distanceControl.value!)
       }
-      this.mapService.targetHalo.next(this.distanceControl.value!)
       switch(origin) {
         case 'cuisine':
         case 'borough':
           if (a_value?.name) {
-            this.restaurantConf.params['filters'] = this.httpService.setFilter(origin, a_value.name, this.restaurantConf.params.filters)
-          } else {
-            this.restaurantConf.params.filters = this.httpService.unsetFilter(origin, this.restaurantConf.params.filters)
+            this.restaurantListService.listParams.next({...this.restaurantListService.listParams.value, filters: this.httpService.setFilter(origin, a_value.name, this.restaurantConf.params.filters)})
+          } else if (this.httpService.isFilter(origin, this.restaurantListService.listParams.value.filters)) {
+            this.restaurantListService.listParams.next({...this.restaurantListService.listParams.value, filters: this.httpService.unsetFilter(origin, this.restaurantConf.params.filters)})
           }
           this.restaurantConf = {...this.restaurantConf}
           break

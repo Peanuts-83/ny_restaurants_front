@@ -16,6 +16,13 @@ export class HttpService {
     return this.http.post<T>(this.baseUrl + a_url, {params: a_params}, this.requestOptions)
   }
 
+  /**
+   * Add a filter to filters
+   * @param a_field
+   * @param a_value
+   * @param a_filters
+   * @returns SingleFilter|CombinedFilter|undefined
+   */
   public setFilter(a_field: string, a_value:string, a_filters?: SingleFilter|CombinedFilter): SingleFilter|CombinedFilter|undefined {
     if (!a_filters) {
       return <SingleFilter>{
@@ -53,6 +60,12 @@ export class HttpService {
     }
   }
 
+  /**
+   * Remove a filter to filters
+   * @param a_field
+   * @param a_filters
+   * @returns SingleFilter|CombinedFilter|undefined
+   */
   public unsetFilter(a_field: string, a_filters?: SingleFilter|CombinedFilter): SingleFilter|CombinedFilter|undefined {
     if (!a_filters || (a_filters && Object.keys(a_filters).includes('field'))) {
       // SingleFilter
@@ -64,6 +77,25 @@ export class HttpService {
     }
   }
 
+  /**
+   * Is a specific filter available in filters
+   * @param a_field
+   * @param a_filters
+   * @returns boolean
+   */
+  public isFilter(a_field: string, a_filters?: SingleFilter|CombinedFilter): boolean {
+    if (!a_filters) {
+      return false
+    } else {
+      if (Object.keys(a_filters).includes('field')) {
+        // SingleFilter
+        return (<SingleFilter>a_filters).field === a_field
+      } else {
+        // CombinedFilter
+        return (<CombinedFilter>a_filters).filter_elements.some(f => f.field === a_field)
+      }
+    }
+  }
 }
 
 

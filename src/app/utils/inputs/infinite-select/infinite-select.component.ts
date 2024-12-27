@@ -115,11 +115,13 @@ export class InfiniteSelectComponent<T extends { name: string, borough?: string,
    */
   @Input()
   set config(value: InputConf) {
-    this._config = value
-    this.nbr.next(this.config.params.nbr || 10)
-    this.pageNbr.next(this.config.params.page_nbr || 1)
-    this.filters.next(this.config.params.filters)
-    this.sort.next(this.config.params.sort)
+    if (value && this._config!==value) {
+      this._config = value
+      this.nbr.next(this.config.params.nbr || 10)
+      this.pageNbr.next(this.config.params.page_nbr || 1)
+      this.filters.next(this.config.params.filters)
+      this.sort.next(this.config.params.sort)
+    }
   }
   get config(): InputConf {
     return this._config
