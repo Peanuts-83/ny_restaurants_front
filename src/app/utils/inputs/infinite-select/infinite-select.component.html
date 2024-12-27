@@ -9,7 +9,7 @@
     </div>
     }
     <mat-label>{{label}}</mat-label>
-    <mat-select [formControl]="control" [compareWith]="compareControlValues" (selectionChange)="value=$event.value;onChange($event.value)" (openedChange)="onSwitch($event)" >
+    <mat-select [formControl]="control" [compareWith]="compareControlValues" (selectionChange)="onChange($event.value);" (openedChange)="onSwitch($event)" >
       <mat-option>-</mat-option>
       @for (item of items; track $index;) {
       <mat-option [value]="item">

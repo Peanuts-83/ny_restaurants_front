@@ -1,5 +1,6 @@
-import { SortWay } from './../models/filter-params.interface'
-import { Component, OnInit } from '@angular/core'
+import { InfiniteSelectComponent } from './../utils/inputs/infinite-select/infinite-select.component'
+import { OpField, SingleFilter, SortWay } from './../models/filter-params.interface'
+import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, viewChild } from '@angular/core'
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { InputConf } from '../models/input-conf.interface'
 import { BoroughDistinctService } from './services/borough-distinct.service'
@@ -7,20 +8,29 @@ import { RestaurantDistinctService } from './services/restaurant-distinct.servic
 import { RestaurantListService } from './services/restaurant-list.service'
 import { Restaurant } from '../models/restaurant.interface'
 import { Distinct } from '../models/distinct.interface'
+import { MapService } from '../services/map.service'
+import { MatSlider } from '@angular/material/slider'
+import { Marker } from 'leaflet'
+import { Subscription } from 'rxjs'
+import { InfiniteScrollService } from '../services/infinite-scroll.service'
+import { HttpService } from '../services/http.service'
 
 @Component({
   selector: 'app-nav',
   templateUrl: './nav.component.html',
   styleUrls: ['./nav.component.less']
 })
-export class NavComponent implements OnInit {
+export class NavComponent implements OnInit, OnDestroy, AfterViewInit {
+  private subs: Subscription[] = []
   public form!: FormGroup
-  restaurantControl = new FormControl<Restaurant|null>(null)
-  boroughControl = new FormControl<Distinct|null>(null)
-  streetControl = new FormControl<any|null>(null)
-  distanceControl = new FormControl<number|null>(null, Validators.pattern('^[0-9]+$'))
-  cuisineControl = new FormControl<Distinct|null>(null)
-  gradesControl = new FormControl<any|null>(null)
+  restaurantControl = new FormControl<Restaurant | null>(null)
+  boroughControl = new FormControl<Distinct | null>(null)
+  streetControl = new FormControl<any | null>(null)
+  distanceControl = new FormControl<number | null>(200, Validators.pattern('^[0-9]+$'))
+  cuisineControl = new FormControl<Distinct | null>(null)
+  gradesControl = new FormControl<any | null>(null)
+
+  target?: Marker
 
   /**
    * Select configs
@@ -30,7 +40,19 @@ export class NavComponent implements OnInit {
   public streetConf: InputConf = { service: this.restaurantDistinctService, params: { sort: { field: 'address.street', way: SortWay.ASC } }, formControl: 'street' }
   public cuisineConf: InputConf = { service: this.restaurantDistinctService, params: { sort: { field: 'cuisine', way: SortWay.ASC } }, formControl: 'cuisine' }
 
-  constructor(private fb: FormBuilder, public boroughDistinctService: BoroughDistinctService, public restaurantDistinctService: RestaurantDistinctService, public restaurantListService:RestaurantListService ) { }
+  constructor(private fb: FormBuilder, public boroughDistinctService: BoroughDistinctService, public restaurantDistinctService: RestaurantDistinctService, public restaurantListService: RestaurantListService, public mapService: MapService, private httpService:HttpService) {
+    this.subs.push(this.mapService.target.subscribe(result => {
+      if (this.distanceSlider) {
+        if (result) {
+          this.target = result
+          this.distanceSlider.disabled = false
+        } else {
+          this.target = undefined
+          this.distanceSlider.disabled = true
+        }
+      }
+    }))
+  }
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -41,19 +63,73 @@ export class NavComponent implements OnInit {
       cuisine: this.cuisineControl,
       grades: this.gradesControl // from A to F... to Z (Others)
     })
-    this.form.get('restaurant')!.valueChanges.subscribe(control => {
-      // console.log(control)
-      if (control!==null) {
+    this.subs.push(this.form.get('restaurant')!.valueChanges.subscribe(control => {
+      this.onRestaurantChange.emit(control)
+      if (control !== null) {
         this.form.patchValue({
-          borough: {name: control.borough},
-          street: {name: control.address.street},
-          cuisine: {name: control.cuisine},
+          borough: { name: control.borough },
+          street: { name: control.address.street },
+          cuisine: { name: control.cuisine },
+          grades: { name: control.grades }
         })
       }
-    })
+    }))
   }
+
+  ngOnDestroy(): void {
+    this.subs && this.subs.forEach(s => s.unsubscribe())
+  }
+
+  @Output() onRestaurantChange = new EventEmitter<Restaurant>()
+  @Output() onToggleNav = new EventEmitter<boolean>()
+
+  @ViewChild('restaurantSelect') restaurantSelect!: InfiniteSelectComponent<any>
+  @ViewChild('cuisineSelect') cuisineSelect!: InfiniteSelectComponent<any>
+  @ViewChild('boroughSelect') boroughSelect!: InfiniteSelectComponent<any>
+  @ViewChild('streetSelect') streetSelect!: InfiniteSelectComponent<any>
+  @ViewChild('distanceSlider') distanceSlider!: MatSlider
+  public inputs!: (InfiniteSelectComponent<any> | MatSlider)[]
+
+  ngAfterViewInit(): void {
+    this.inputs = [this.restaurantSelect, this.cuisineSelect, this.boroughSelect, this.streetSelect, this.distanceSlider]
+    // for (let select of inputs) {
+    //   select.onChange()
+    // }
+  }
+
+  public onChangeSelectValue(a_value: any, origin: string) {
+    // if (!a_value) { return }
+    if (origin !== 'restaurant') {
+      this.form.get('restaurant')?.setValue(null)
+      if (this.target) {
+        this.distanceSlider.disabled = false
+      }
+      this.mapService.targetHalo.next(this.distanceControl.value!)
+      switch(origin) {
+        case 'cuisine':
+        case 'borough':
+          if (a_value?.name) {
+            this.restaurantConf.params['filters'] = this.httpService.setFilter(origin, a_value.name, this.restaurantConf.params.filters)
+          } else {
+            this.restaurantConf.params.filters = this.httpService.unsetFilter(origin, this.restaurantConf.params.filters)
+          }
+          this.restaurantConf = {...this.restaurantConf}
+          break
+      }
+    } else {
+      this.distanceSlider.disabled = true
+    }
+    // const blankInputs = this.inputs.filter(sel => sel.label!==a_value['name'])
+  }
+
+
 
   public onSubmit() {
 
+  }
+
+  public toggleNav(a_event: MouseEvent) {
+    a_event.stopPropagation()
+    this.onToggleNav.emit(true)
   }
 }

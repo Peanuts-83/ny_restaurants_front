@@ -4,6 +4,18 @@
   background-color: grey;
 }
 
+.container {
+  display: flex;
+  background-image: linear-gradient(rgba(218, 135, 169, 0.9), rgba(203, 151, 195, 0.8)), url('../../assets/img/vintage-bricks-urban-buildings-walls.jpg');
+  filter: invert(100%); /* Apply negative (invert colors) */
+  background-size: cover; /* Ensure the image covers the entire nav area */
+  background-position: center; /* Center the image */
+  background-repeat: no-repeat;
+  justify-content: space-evenly;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
 .col {
   display: flex;
   width: 100%;
@@ -25,9 +37,71 @@ app-infinite-select {
   justify-content: space-evenly;
   width: 100%;
   * {
-    border: 1px dashed red;
+    // border: 1px dashed red;
   }
-  .restaurant {
-    width: auto;
+}
+
+.bottom-nav {
+  position: relative;
+
+  .nav-toggle {
+    display: flex;
+    position: absolute;
+    cursor: pointer;
+    padding: 10px 0;
+    font-family: smashWall;
+    font-size: xxx-large;
+    .hulk {
+      &:hover {
+        animation: none; /* Reset the animation */
+        animation: earthquake 0.1s ease-in-out 5; /* Restart on hover */
+      }
+      img {
+        filter: drop-shadow(3px 7px 5px rgba(0, 0, 0, 1));
+        position: absolute;
+        top: -20px;
+        width: 130px;
+      }
+      .title {
+        padding: 10px 0 0 130px;
+        transform: rotate(-6deg);
+        animation: earthquake 0.1s ease-in-out 25;
+      }
+    }
   }
+}
+
+
+.col.distance {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 0;
+  .dist-label {
+    text-align: center;
+  }
+}
+
+/* tablets */
+@media (max-width:768px) {
+  ::ng-deep .mat-input-element{
+    font-size: small;
+  }
+
+}
+
+/* mobils */
+@media (max-width:520px) {
+  .row {
+    flex-direction: column;
+  }
+}
+
+
+/* Earthquake animation */
+@keyframes earthquake {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(-1px, 2px) rotate(-1deg) scale(105%); }
+  50% { transform: translate(1px, -6px) rotate(2deg); }
+  75% { transform: translate(-2px, -1px) rotate(-1deg) scale(97%); }
+  100% { transform: translate(1px, 1px) rotate(3deg); }
 }

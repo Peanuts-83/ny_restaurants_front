@@ -12,10 +12,8 @@ Back-end part of this app is [NyRestaurantsAPI](https://github.com/Peanuts-83/ny
 
 wip...
 
-## TODO:
+## BRANCH reveal_on_map
 
-* UI interface with base map and base nav/filter form
-* UX reactive form with logic (infiniteScroll component, search field incorporated)
-* UI/UX map fine tuning (map marker, info display, rectangle map coords)
-* UX form final fixes
-* UI Homepage and animation
+* Set marker at restaurant selected point
+* Go to point and zoom
+* Set tooltip & popup text values

@@ -1,1 +1,21 @@
-<div #mapContainer class="map-container"></div>
+<div #mapContainer class="map-container">
+  <div class="nav-target" [ngClass]="{active: doSetPosition}">
+    <img src="assets/img/target-icon.png" alt="target" (click)="doSetPosition=!doSetPosition">
+    @if (doSetPosition) {
+      <span class="target-text">set your position</span>
+    }
+  </div>
+</div>
+
+<ng-template #popupTemplate let-restaurant="restaurant">
+  <div class='markerPopup'>
+    <h3>{{ restaurant.name }}</h3>
+    <div class='cuisine'>{{ restaurant.cuisine }}</div>
+    <div class='score'>
+      <i class="fa-solid fa-star"></i>
+      <span *ngFor="let grade of restaurant.grades">{{ grade.grade }}</span>
+    </div>
+    <div>{{ restaurant.address.building }} - {{ restaurant.address.street }}</div>
+    <div class='borough'>{{ restaurant.borough }}</div>
+  </div>
+</ng-template>

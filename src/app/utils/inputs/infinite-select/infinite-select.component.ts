@@ -1,10 +1,10 @@
-import { Component, Input, OnDestroy, OnInit, ViewChild, forwardRef, ViewEncapsulation, Injector } from '@angular/core'
+import { Component, Input, OnDestroy, OnInit, ViewChild, forwardRef, ViewEncapsulation, Injector, Output, EventEmitter } from '@angular/core'
 import { ControlValueAccessor, FormControl, FormGroup, NG_VALUE_ACCESSOR, NgControl } from '@angular/forms'
 import { MatInput } from '@angular/material/input'
 import { MatSelect } from '@angular/material/select'
 import { resourceUsage } from 'process'
 import { BehaviorSubject, Subscription, debounceTime, distinctUntilChanged, firstValueFrom, of, switchMap } from 'rxjs'
-import { FilterParams, SortParams } from 'src/app/models/filter-params.interface'
+import { FilterParams, OpField, SortParams } from 'src/app/models/filter-params.interface'
 import { InputConf } from 'src/app/models/input-conf.interface'
 import { BaseApiService } from 'src/app/services/base-api.service'
 import { API, OPERATOR } from 'src/app/services/http.service'
@@ -58,8 +58,12 @@ export class InfiniteSelectComponent<T extends { name: string, borough?: string,
 
   constructor(private scrollService: InfiniteScrollService, private injector: Injector, private apiService: BaseApiService) { }
 
+  @Output() onChangeValue = new EventEmitter()
+
   // ControlValueAccessor implementation //
-  onChange = (value: any) => { }
+  public onChange(value: any) {
+    this.onChangeValue.emit(value)
+  }
   onTouched = () => { }
   isDisabled = false
 
@@ -80,7 +84,7 @@ export class InfiniteSelectComponent<T extends { name: string, borough?: string,
     return obj1 && obj2 && Object.keys(obj1).every(k => obj1[k] === obj2[k])
   }
   registerOnChange(fn: (value: any) => void): void {
-    this.onChange = fn
+    // this.onChange = fn
   }
   registerOnTouched(fn: any): void {
     this.onTouched = fn
@@ -112,18 +116,10 @@ export class InfiniteSelectComponent<T extends { name: string, borough?: string,
   @Input()
   set config(value: InputConf) {
     this._config = value
-    if (this.config.params.nbr) {
-      this.nbr.next(this.config.params.nbr)
-    }
-    if (this.config.params.page_nbr) {
-      this.pageNbr.next(this.config.params.page_nbr)
-    }
-    if (this.config.params.filters) {
-      this.filters.next(this.config.params.filters)
-    }
-    if (this.config.params.sort) {
-      this.sort.next(this.config.params.sort)
-    }
+    this.nbr.next(this.config.params.nbr || 10)
+    this.pageNbr.next(this.config.params.page_nbr || 1)
+    this.filters.next(this.config.params.filters)
+    this.sort.next(this.config.params.sort)
   }
   get config(): InputConf {
     return this._config
@@ -142,7 +138,10 @@ export class InfiniteSelectComponent<T extends { name: string, borough?: string,
     this.subscriptions.concat([
       this.nbr.subscribe(result => this.config.params.nbr = result),
       this.pageNbr.subscribe(result => this.config.params.page_nbr = result),
-      this.filters.subscribe(result => this.config.params.filters = result),
+      this.filters.subscribe(result => {
+        this.config.params.filters = result
+        this._doRefresh()
+      }),
       this.sort.subscribe(result => this.config.params.sort = result)
     ])
     // search init
@@ -155,6 +154,10 @@ export class InfiniteSelectComponent<T extends { name: string, borough?: string,
   /** get <nbr> first items on load */
   doInitItems() {
     this.isLoading = true
+    this._doRefresh()
+  }
+
+  private _doRefresh() {
     this.scrollService.doPost<T[]>(this.config.service.apiConf.baseApi, this.config.params)
       .subscribe(result => {
         if (result && result.length > 0) {
@@ -166,6 +169,7 @@ export class InfiniteSelectComponent<T extends { name: string, borough?: string,
             this.pageNbr.next(this.pageNbr.value + 1)
           }
         } else {
+          this.items = []
           this.endScroll = true
         }
         this.isLoading = false
@@ -188,7 +192,7 @@ export class InfiniteSelectComponent<T extends { name: string, borough?: string,
           this.filters.next({
             field: this.config.params.sort?.field!,
             value: value || "",
-            operator_field: '$regex'
+            operator_field: OpField.CONTAIN
           })
           this.pageNbr.next(1)
           return this.scrollService.doPost<T[]>(this.config.service.apiConf.baseApi, this.config.params)
@@ -200,7 +204,7 @@ export class InfiniteSelectComponent<T extends { name: string, borough?: string,
         this.items = result
       } else if (this.filters.value) {
         // back to items without search filter
-        this.filters.next(undefined)
+        // this.filters.next(undefined)
         this.pageNbr.next(1)
         this._unsetControl()
         this.doInitItems()
