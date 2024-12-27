@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http'
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs'
 import { AppHttpParams, CombinedFilter, Operator, OpField, SingleFilter } from '../models/filter-params.interface'
+import { HTTPResponse } from './base-api.service'
 
 @Injectable({
   providedIn: 'root'
@@ -12,8 +13,8 @@ export class HttpService {
 
   constructor(private http: HttpClient) { }
 
-  public post<T>(a_url:string, a_params?: AppHttpParams): Observable<T> {
-    return this.http.post<T>(this.baseUrl + a_url, {params: a_params}, this.requestOptions)
+  public post<T>(a_url:string, a_params?: AppHttpParams): Observable<HTTPResponse<T>> {
+    return this.http.post<HTTPResponse<T>>(this.baseUrl + a_url, {params: a_params}, this.requestOptions)
   }
 
   /**

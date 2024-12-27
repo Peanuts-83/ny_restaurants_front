@@ -111,9 +111,9 @@ export class NavComponent implements OnInit, OnDestroy, AfterViewInit {
           case 'borough':
           this.form.get('restaurant')?.setValue(null)
           if (a_value?.name) {
-            this.restaurantListService.listParams.next({...this.restaurantListService.listParams.value, filters: this.httpService.setFilter(origin, a_value.name, this.restaurantConf.params.filters)})
+            this.restaurantListService.listParams.next({...this.restaurantListService.listParams.value, page_nbr:1, filters: this.httpService.setFilter(origin, a_value.name, this.restaurantConf.params.filters)})
           } else if (this.httpService.isFilter(origin, this.restaurantListService.listParams.value.filters)) {
-            this.restaurantListService.listParams.next({...this.restaurantListService.listParams.value, filters: this.httpService.unsetFilter(origin, this.restaurantConf.params.filters)})
+            this.restaurantListService.listParams.next({...this.restaurantListService.listParams.value, page_nbr:1, filters: this.httpService.unsetFilter(origin, this.restaurantConf.params.filters)})
           }
           this.restaurantConf = {...this.restaurantConf}
           break

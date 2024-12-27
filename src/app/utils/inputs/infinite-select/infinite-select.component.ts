@@ -6,7 +6,7 @@ import { resourceUsage } from 'process'
 import { BehaviorSubject, Subscription, debounceTime, distinctUntilChanged, firstValueFrom, of, switchMap } from 'rxjs'
 import { FilterParams, OpField, SortParams } from 'src/app/models/filter-params.interface'
 import { InputConf } from 'src/app/models/input-conf.interface'
-import { BaseApiService } from 'src/app/services/base-api.service'
+import { BaseApiService, HTTPResponse } from 'src/app/services/base-api.service'
 import { API, OPERATOR } from 'src/app/services/http.service'
 import { InfiniteScrollService } from 'src/app/services/infinite-scroll.service'
 
@@ -142,7 +142,7 @@ export class InfiniteSelectComponent<T extends { name: string, borough?: string,
       this.pageNbr.subscribe(result => this.config.params.page_nbr = result),
       this.filters.subscribe(result => {
         this.config.params.filters = result
-        this._doRefresh()
+        this._doNext()
       }),
       this.sort.subscribe(result => this.config.params.sort = result)
     ])
@@ -156,19 +156,19 @@ export class InfiniteSelectComponent<T extends { name: string, borough?: string,
   /** get <nbr> first items on load */
   doInitItems() {
     this.isLoading = true
-    this._doRefresh()
+    this._doNext()
   }
 
-  private _doRefresh() {
+  private _doNext() {
     this.scrollService.doPost<T[]>(this.config.service.apiConf.baseApi, this.config.params)
       .subscribe(result => {
-        if (result && result.length > 0) {
-          this.items = result
-          if (result.length < this.nbr.value) {
+        if (result && result.data.length > 0) {
+          this.items = result.data
+          if (result.data.length < this.nbr.value) {
             this.endScroll = true
           } else {
             this.endScroll = false
-            this.pageNbr.next(this.pageNbr.value + 1)
+            this.pageNbr.next(result.page_nbr! + 1)
           }
         } else {
           this.items = []
@@ -203,7 +203,7 @@ export class InfiniteSelectComponent<T extends { name: string, borough?: string,
       })
     ).subscribe(result => {
       if (result !== null) {
-        this.items = result
+        this.items = result.data
       } else if (this.filters.value) {
         // back to items without search filter
         // this.filters.next(undefined)
@@ -251,11 +251,11 @@ export class InfiniteSelectComponent<T extends { name: string, borough?: string,
     if (!this.isLoading && !this.endScroll && (l_select.scrollTop + l_select.clientHeight >= l_select.scrollHeight / 1.1)) {
       this.isLoading = true
       this.scrollService.loadNext<T>(this.config, this.items!).subscribe(
-        (result: T[]) => {
+        (result: HTTPResponse<T[]>) => {
           if (result) {
-            this.items = this.items!.concat(result)
+            this.items = this.items!.concat(result.data)
             // no more api call if length < this.nbr
-            if (result.length < this.nbr.value) {
+            if (result.data.length < this.nbr.value) {
               this.endScroll = true
             } else {
               this.endScroll = false

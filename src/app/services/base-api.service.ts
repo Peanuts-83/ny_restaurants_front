@@ -9,7 +9,12 @@ export abstract class BaseApiService {
 
   constructor(public httpService: HttpService) {}
 
-  public doPost<T>(url:string, params:AppHttpParams): Observable<T> {
+  public doPost<T>(url:string, params:AppHttpParams): Observable<HTTPResponse<T>> {
     return this.httpService.post<T>(url, params)
   }
+}
+
+export interface HTTPResponse<T> {
+  data: T
+  page_nbr?: number
 }
