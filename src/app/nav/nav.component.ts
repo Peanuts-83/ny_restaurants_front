@@ -1,6 +1,6 @@
 import { InfiniteSelectComponent } from './../utils/inputs/infinite-select/infinite-select.component'
 import { SortWay } from './../models/filter-params.interface'
-import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core'
+import { AfterViewInit, Component, EventEmitter, OnDestroy, OnInit, Output, ViewChild } from '@angular/core'
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { InputConf } from '../models/input-conf.interface'
 import { BoroughDistinctService } from './services/borough-distinct.service'
@@ -67,7 +67,7 @@ export class NavComponent implements OnInit, OnDestroy, AfterViewInit {
     })
     this.subs.push(this.form.get('restaurant')!.valueChanges.subscribe(control => {
       this.onRestaurantChange.emit(control)
-      if (control !== null) {
+      if (control !== undefined && control !== null) {
         this.form.patchValue({
           borough: { name: control.borough },
           street: { name: control.address.street },
@@ -102,14 +102,14 @@ export class NavComponent implements OnInit, OnDestroy, AfterViewInit {
   public onChangeSelectValue(a_value: any, origin: string) {
     // if (!a_value) { return }
     if (origin !== 'restaurant') {
-      this.form.get('restaurant')?.setValue(null)
       if (this.target) {
         this.distanceSlider.disabled = false
         this.mapService.targetHalo.next(this.distanceControl.value!)
       }
       switch(origin) {
         case 'cuisine':
-        case 'borough':
+          case 'borough':
+          this.form.get('restaurant')?.setValue(null)
           if (a_value?.name) {
             this.restaurantListService.listParams.next({...this.restaurantListService.listParams.value, filters: this.httpService.setFilter(origin, a_value.name, this.restaurantConf.params.filters)})
           } else if (this.httpService.isFilter(origin, this.restaurantListService.listParams.value.filters)) {
@@ -119,7 +119,7 @@ export class NavComponent implements OnInit, OnDestroy, AfterViewInit {
           break
       }
     } else {
-      this.distanceSlider.disabled = true
+      this.distanceSlider.disabled = this.target ? false : true
     }
     // const blankInputs = this.inputs.filter(sel => sel.label!==a_value['name'])
   }
