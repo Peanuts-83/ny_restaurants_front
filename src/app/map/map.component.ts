@@ -64,6 +64,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     if (!a_value) {
       this._markers && this._markers.forEach(m => {
         this.map.removeLayer(m)
+        this.restaurantValue = undefined
       })
     } else {
       this.restaurantValue = a_value

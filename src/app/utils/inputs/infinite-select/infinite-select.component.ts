@@ -169,6 +169,7 @@ export class InfiniteSelectComponent<T extends { name: string, borough?: string,
             this.pageNbr.next(this.pageNbr.value + 1)
           }
         } else {
+          this.items = []
           this.endScroll = true
         }
         this.isLoading = false
