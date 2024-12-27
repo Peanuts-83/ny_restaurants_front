@@ -1,7 +1,7 @@
 
 export interface SingleFilter {
   field: string
-  operator_field: string
+  operator_field: OpField
   value: string
 }
 
