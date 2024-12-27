@@ -1,4 +1,11 @@
-/* You can add global styles to this file, and also import other style files */
+@font-face {
+  font-family: hulkSmash;
+  src: url('assets/font/HulksmashRegular-5EPj.ttf');
+}
+@font-face {
+  font-family: smashWall;
+  src: url('assets/font/SmashWallPersonalUse-rg30A.ttf');
+}
 
 html,
 body {
@@ -22,4 +29,21 @@ app-nav {
   &.hide {
     top: -200px;
   }
+}
+
+/* tablets */
+@media (max-width:768px) {
+  .mat-mdc-select {
+    font-size: 6px !important;
+  }
+  app-nav {
+    &.hide {
+      top: -400px;
+    }
+  }
+}
+
+/* mobils */
+@media (max-width:520px) {
+
 }
