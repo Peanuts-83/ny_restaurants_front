@@ -17,3 +17,10 @@ wip...
 * Set marker at restaurant selected point
 * Go to point and zoom
 * Set tooltip & popup text values
+
+## TODO
+
+* zoom to borough at selection
+* zoom/dezoom to keep selected restaurants in active zone
+* landing page & animation
+* production config
