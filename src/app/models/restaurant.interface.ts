@@ -20,3 +20,8 @@ export interface Grade {
   grade: string
   score: number
 }
+
+export interface optionMarker {
+  popupContent?: any,
+  tooltipContent?: string
+}

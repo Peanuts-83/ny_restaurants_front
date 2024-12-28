@@ -2,7 +2,7 @@
 export interface SingleFilter {
   field: string
   operator_field: OpField
-  value: string
+  value: string|number
 }
 
 // Operators for single_filter
@@ -17,6 +17,7 @@ export enum OpField {
   LT = "$lt",
   LTE = "$lte",
   NOT = "$not",
+  GEO = '$geoNear' // {field: JSON.stringify([long,lat]), value: maxDistance, operator: OpField.GEO}
 }
 
 export interface CombinedFilter {
@@ -36,7 +37,7 @@ export enum Operator {
  * AppHttpParams
  */
 
-export type FilterParams = SingleFilter | CombinedFilter | undefined
+export type FilterParams = SingleFilter | CombinedFilter
 
 export enum SortWay {
   ASC = 1,

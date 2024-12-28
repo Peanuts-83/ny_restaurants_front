@@ -1,6 +1,6 @@
 import { InfiniteSelectComponent } from './../utils/inputs/infinite-select/infinite-select.component'
 import { SortWay } from './../models/filter-params.interface'
-import { AfterViewInit, Component, EventEmitter, OnDestroy, OnInit, Output, ViewChild } from '@angular/core'
+import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core'
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { InputConf } from '../models/input-conf.interface'
 import { BoroughDistinctService } from './services/borough-distinct.service'
@@ -24,12 +24,14 @@ export class NavComponent implements OnInit, OnDestroy, AfterViewInit {
   public form!: FormGroup
   restaurantControl = new FormControl<Restaurant | null>(null)
   boroughControl = new FormControl<Distinct | null>(null)
-  streetControl = new FormControl<any | null>(null)
   distanceControl = new FormControl<number | null>(200, Validators.pattern('^[0-9]+$'))
   cuisineControl = new FormControl<Distinct | null>(null)
   gradesControl = new FormControl<any | null>(null)
 
   target?: Marker
+  canUseHalo = false
+  @Input() showHalo!: boolean
+  @Output() showHaloChange = new EventEmitter<boolean>()
 
   /**
    * Select configs
@@ -39,15 +41,15 @@ export class NavComponent implements OnInit, OnDestroy, AfterViewInit {
   public streetConf: InputConf = { service: this.restaurantDistinctService, params: { sort: { field: 'address.street', way: SortWay.ASC } }, formControl: 'street' }
   public cuisineConf: InputConf = { service: this.restaurantDistinctService, params: { sort: { field: 'cuisine', way: SortWay.ASC } }, formControl: 'cuisine' }
 
-  constructor(private fb: FormBuilder, public boroughDistinctService: BoroughDistinctService, public restaurantDistinctService: RestaurantDistinctService, public restaurantListService: RestaurantListService, public mapService: MapService, private httpService:HttpService) {
+  constructor(private fb: FormBuilder, public boroughDistinctService: BoroughDistinctService, public restaurantDistinctService: RestaurantDistinctService, public restaurantListService: RestaurantListService, public mapService: MapService, private httpService: HttpService) {
     this.subs.push(this.mapService.target.subscribe(result => {
       if (this.distanceSlider) {
         if (result) {
           this.target = result
-          this.distanceSlider.disabled = false
+          // this.distanceSlider.disabled = false
         } else {
           this.target = undefined
-          this.distanceSlider.disabled = true
+          // this.distanceSlider.disabled = true
         }
       }
     }))
@@ -60,7 +62,6 @@ export class NavComponent implements OnInit, OnDestroy, AfterViewInit {
     this.form = this.fb.group({
       restaurant: this.restaurantControl,
       borough: this.boroughControl,
-      street: this.streetControl,
       distance: this.distanceControl, // depuis la position de user
       cuisine: this.cuisineControl,
       grades: this.gradesControl // from A to F... to Z (Others)
@@ -84,6 +85,7 @@ export class NavComponent implements OnInit, OnDestroy, AfterViewInit {
 
   @Output() onRestaurantChange = new EventEmitter<Restaurant>()
   @Output() onToggleNav = new EventEmitter<boolean>()
+  @Output() onFilterChange = new EventEmitter<null>()
 
   @ViewChild('restaurantSelect') restaurantSelect!: InfiniteSelectComponent<any>
   @ViewChild('cuisineSelect') cuisineSelect!: InfiniteSelectComponent<any>
@@ -103,23 +105,24 @@ export class NavComponent implements OnInit, OnDestroy, AfterViewInit {
     // if (!a_value) { return }
     if (origin !== 'restaurant') {
       if (this.target) {
-        this.distanceSlider.disabled = false
+        // this.distanceSlider.disabled = false
         this.mapService.targetHalo.next(this.distanceControl.value!)
       }
-      switch(origin) {
+      switch (origin) {
         case 'cuisine':
-          case 'borough':
+        case 'borough':
           this.form.get('restaurant')?.setValue(null)
           if (a_value?.name) {
-            this.restaurantListService.listParams.next({...this.restaurantListService.listParams.value, page_nbr:1, filters: this.httpService.setFilter(origin, a_value.name, this.restaurantConf.params.filters)})
+            this.restaurantListService.listParams.next({ ...this.restaurantListService.listParams.value, page_nbr: 1, filters: this.httpService.setFilter(origin, a_value.name, undefined, this.restaurantConf.params.filters) })
           } else if (this.httpService.isFilter(origin, this.restaurantListService.listParams.value.filters)) {
-            this.restaurantListService.listParams.next({...this.restaurantListService.listParams.value, page_nbr:1, filters: this.httpService.unsetFilter(origin, this.restaurantConf.params.filters)})
+            this.restaurantListService.listParams.next({ ...this.restaurantListService.listParams.value, page_nbr: 1, filters: this.httpService.unsetFilter(origin, this.restaurantConf.params.filters) })
           }
-          this.restaurantConf = {...this.restaurantConf}
+          this.restaurantConf = { ...this.restaurantConf }
+          this.onFilterChange.emit()
           break
       }
     } else {
-      this.distanceSlider.disabled = this.target ? false : true
+      // this.distanceSlider.disabled = this.target ? false : true
     }
     // const blankInputs = this.inputs.filter(sel => sel.label!==a_value['name'])
   }

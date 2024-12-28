@@ -1,22 +1,5 @@
 <form class="nav-form row" [formGroup]="form" (ngSubmit)="onSubmit()">
   <div class="row container">
-    <div class="row">
-      <div class="col restaurant">
-        <app-infinite-select #restaurantSelect label="restaurant" formControlName="restaurant"
-          [config]="restaurantConf" (onChangeValue)="onChangeSelectValue($event, 'restaurant')"></app-infinite-select>
-      </div>
-      <div class="col grade">
-        <!-- <mat-slider min="1" max="6" step="6" #gradeInput label="Grades" placeholder="Grades" formControlName="grades" /> -->
-      </div>
-      <div class="col distance">
-        <label class="dist-label" for="distanceInput">near {{distanceInput.value}}m.</label>
-        <mat-slider min="50" max="3050" step="150" showTickMarks label="distance" placeholder="Distance" type="number" disabled #distanceSlider>
-          <input matSliderThumb #distanceInput (valueChange)="onChangeSelectValue($event, 'distance')" formControlName="distance">
-        </mat-slider>
-      </div>
-
-    </div>
-
     <div class="row distincts">
       <div class="col cuisine">
         <app-infinite-select #cuisineSelect label="cuisine" formControlName="cuisine"
@@ -27,12 +10,25 @@
         <app-infinite-select #boroughSelect label="borough" formControlName="borough" (onChangeValue)="onChangeSelectValue($event, 'borough')"
           [config]="boroughConf"></app-infinite-select>
       </div>
-      <div class="col street">
-        <app-infinite-select #streetSelect label="street" formControlName="street" (onChangeValue)="onChangeSelectValue($event, 'street')"
-          [config]="streetConf"></app-infinite-select>
+    </div>
+    <div class="row">
+      <div class="col restaurant">
+        <app-infinite-select #restaurantSelect label="restaurant" formControlName="restaurant"
+          [config]="restaurantConf" (onChangeValue)="onChangeSelectValue($event, 'restaurant')"></app-infinite-select>
+      </div>
+      <div class="col use-distance" title="User position must be set">
+        <label for="canUseHalo">Use radar</label>
+        <mat-checkbox [checked]="canUseHalo" (change)="canUseHalo=!canUseHalo;showHaloChange.emit(canUseHalo);" [disabled]="target===undefined" id="canUseHalo"></mat-checkbox>
+      </div>
+      <div class="col distance">
+        <label class="dist-label" for="distanceInput">near {{distanceInput.value}}m.</label>
+        <mat-slider min="50" max="3050" step="150" showTickMarks label="distance" placeholder="Distance" type="number" [disabled]="canUseHalo===false" #distanceSlider>
+          <input matSliderThumb #distanceInput (valueChange)="onChangeSelectValue($event, 'distance')" formControlName="distance">
+        </mat-slider>
       </div>
     </div>
   </div>
+
 
 </form>
 <!-- <pre>{{form.get('restaurant')?.value|json}}</pre>

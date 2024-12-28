@@ -2,5 +2,8 @@
   (onRestaurantChange)="restaurant=$event"
   (onToggleNav)="showNav=!showNav"
   [ngClass]="{hide:!showNav}"
+  [(showHalo)]="showHalo"
+  (onFilterChange)="updateHaloMarkers()"
   ></app-nav>
-<app-map [restaurant]="restaurant"></app-map>
+<app-map [restaurant]="restaurant" [(canShowHalo)]="showHalo"></app-map>
+<!-- ajout dbldatabinding pour setter canshow depuis la map -->

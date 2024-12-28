@@ -1,5 +1,6 @@
-import { Component, ViewEncapsulation } from '@angular/core';
+import { Component, ViewChild, ViewEncapsulation } from '@angular/core';
 import { Restaurant } from './models/restaurant.interface'
+import { MapComponent } from './map/map.component'
 
 @Component({
   selector: 'app-root',
@@ -13,4 +14,12 @@ export class AppComponent {
   public restaurant!:Restaurant
 
   public showNav = true
+  public showHalo!: boolean
+
+  public updateHaloMarkers() {
+    this.mapComp.doLoadHaloRestaurants()
+  }
+
+  @ViewChild(MapComponent)
+  mapComp!: MapComponent
 }

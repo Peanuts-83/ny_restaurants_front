@@ -24,11 +24,11 @@ export class HttpService {
    * @param a_filters
    * @returns SingleFilter|CombinedFilter|undefined
    */
-  public setFilter(a_field: string, a_value:string, a_filters?: SingleFilter|CombinedFilter): SingleFilter|CombinedFilter|undefined {
+  public setFilter(a_field: any, a_value:string|number, a_operatorField?:OpField, a_filters?: SingleFilter|CombinedFilter): SingleFilter|CombinedFilter|undefined {
     if (!a_filters) {
       return <SingleFilter>{
         field: a_field,
-        operator_field: OpField.EQ,
+        operator_field: a_operatorField || OpField.EQ,
         value: a_value
       }
     } else if (Object.keys(a_filters).includes('field')) {
@@ -38,7 +38,7 @@ export class HttpService {
         <SingleFilter>a_filters,
         {
           field: a_field,
-          operator_field: OpField.EQ,
+          operator_field: a_operatorField || OpField.EQ,
           value: a_value}
       ],
       operator: Operator.AND
@@ -51,7 +51,7 @@ export class HttpService {
         filter_elements: [...(<CombinedFilter>a_filters).filter_elements,
           {
             field: a_field,
-            operator_field: OpField.EQ,
+            operator_field: a_operatorField || OpField.EQ,
             value: a_value}
         ],
         operator: Operator.AND
