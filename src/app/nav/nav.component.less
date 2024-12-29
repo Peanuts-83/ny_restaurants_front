@@ -37,9 +37,6 @@ app-infinite-select {
   display: flex;
   justify-content: space-evenly;
   width: 100%;
-  mat-slider-track-fill, mat-slider-thumb {
-    background-color: cyan !important;
-  }
 }
 
 .bottom-nav {
@@ -99,9 +96,18 @@ app-infinite-select {
     &.active {
       opacity: 100%;
     }
-    .halo-text {
-      font-size: 1em;
-      color: white;
+    .slide-toggle-txt {
+      display: flex;
+      justify-content: space-around;
+      i {
+        font-size: 18px;
+        color: white;
+        margin: 0 5px;
+      }
+      .halo-text {
+        font-size: 1em;
+        color: white;
+      }
     }
   }
 }
@@ -118,6 +124,20 @@ app-infinite-select {
 @media (max-width:520px) {
   .row {
     flex-direction: column;
+  }
+  .slide-toggle {
+    margin-bottom: 15px;
+  }
+  .bottom-nav .nav-toggle .hulk {
+    img {
+      width: 80px;
+    }
+    .title {
+      padding: 10px 0 0 80px;
+      font-size: xx-large;
+      transform: rotate(-6deg);
+      animation: earthquake 0.1s ease-in-out 25;
+    }
   }
 }
 
