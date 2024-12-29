@@ -39,10 +39,28 @@
   z-index: 1000;
   bottom: 10px;
   left: 10px;
-  &.active {
-    filter: drop-shadow(0 0 5px rgb(229, 10, 10));
+  &.active, &:hover {
+    filter: drop-shadow(0 0 3px crimson);
+  }
+  .target-text{
+    background: black !important;
+    padding: 0 5px;
+    border-radius: 15px;
+    color: white;
   }
   img {
     width: 60px;
+  }
+}
+
+/* tablets */
+@media (max-width:915px) {
+
+}
+
+/* mobils */
+@media (max-width:520px) {
+  .nav-target {
+    margin-bottom: 30px;
   }
 }

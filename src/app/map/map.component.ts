@@ -87,7 +87,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
           className: 'halo',
           radius: this.mapService.targetHalo.value,
           stroke: false,
-          fillColor: 'green',
+          fillColor: 'crimson',
           fillOpacity: value ? .4 : 0
         }))
         this.haloMarkerCircle.value?.addTo(this.map)
@@ -316,7 +316,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         className: 'halo',
         radius: this.mapService.targetHalo.value,
         stroke: false,
-        fillColor: 'green',
+        fillColor: 'crimson',
         fillOpacity: this.canShowHalo ? .4 : 0
       }))
       this.haloMarkerCircle.value!.addTo(this.map)

@@ -6,14 +6,15 @@
 
 .container {
   display: flex;
-  background-image: linear-gradient(rgba(218, 135, 169, 0.9), rgba(203, 151, 195, 0.8)), url('../../assets/img/vintage-bricks-urban-buildings-walls.jpg');
-  filter: invert(100%); /* Apply negative (invert colors) */
+  background-image: linear-gradient(rgba(30, 67, 4, 0.9), rgba(8, 144, 47, 0.8)), url('../../assets/img/vintage-bricks-urban-buildings-walls.jpg');
+  // filter: invert(100%); /* Apply negative (invert colors) */
   background-size: cover; /* Ensure the image covers the entire nav area */
   background-position: center; /* Center the image */
   background-repeat: no-repeat;
   justify-content: space-evenly;
   align-items: center;
   flex-wrap: wrap;
+  padding: 0 10px;
 }
 
 .col {
@@ -36,8 +37,8 @@ app-infinite-select {
   display: flex;
   justify-content: space-evenly;
   width: 100%;
-  * {
-    // border: 1px dashed red;
+  mat-slider-track-fill, mat-slider-thumb {
+    background-color: cyan !important;
   }
 }
 
@@ -90,7 +91,7 @@ app-infinite-select {
 }
 
 /* tablets */
-@media (max-width:768px) {
+@media (max-width:915px) {
   ::ng-deep .mat-input-element{
     font-size: small;
   }

@@ -24,3 +24,4 @@ wip...
 * zoom/dezoom to keep selected restaurants in active zone
 * landing page & animation
 * production config
+* trace path to selected

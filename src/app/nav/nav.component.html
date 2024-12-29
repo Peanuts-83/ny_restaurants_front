@@ -16,13 +16,10 @@
         <app-infinite-select #restaurantSelect label="restaurant" formControlName="restaurant"
           [config]="restaurantConf" (onChangeValue)="onChangeSelectValue($event, 'restaurant')"></app-infinite-select>
       </div>
-      <div class="col use-distance" title="User position must be set">
-        <label for="canUseHalo">Use radar</label>
-        <mat-checkbox [checked]="canUseHalo" (change)="canUseHalo=!canUseHalo;showHaloChange.emit(canUseHalo);" [disabled]="target===undefined" id="canUseHalo"></mat-checkbox>
-      </div>
       <div class="col distance">
+        <mat-checkbox [checked]="canUseHalo" (change)="canUseHalo=!canUseHalo;showHaloChange.emit(canUseHalo);" [disabled]="target===undefined" id="canUseHalo"></mat-checkbox>
         <label class="dist-label" for="distanceInput">near {{distanceInput.value}}m.</label>
-        <mat-slider min="50" max="3050" step="150" showTickMarks label="distance" placeholder="Distance" type="number" [disabled]="canUseHalo===false" #distanceSlider>
+        <mat-slider min="50" max="3050" step="150" color="accent" showTickMarks label="distance" placeholder="Distance" type="number" [disabled]="canUseHalo===false" #distanceSlider>
           <input matSliderThumb #distanceInput (valueChange)="onChangeSelectValue($event, 'distance')" formControlName="distance">
         </mat-slider>
       </div>

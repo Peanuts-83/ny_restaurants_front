@@ -1,6 +1,9 @@
 <div #mapContainer class="map-container">
   <div class="nav-target" [ngClass]="{active: targetMarker!==undefined}">
     <img src="assets/img/target-icon.png" alt="target" (click)="doToggleTarget($event)">
+    @if (canSetPosition) {
+      <div class="target-text">set user position</div>
+    }
 </div>
 
 <ng-template #popupTemplate let-restaurant="restaurant">

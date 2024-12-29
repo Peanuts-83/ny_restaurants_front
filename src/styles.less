@@ -7,6 +7,10 @@
   src: url('assets/font/SmashWallPersonalUse-rg30A.ttf');
 }
 
+*{
+  box-sizing: border-box;
+}
+
 html,
 body {
   height: 100%;
@@ -31,10 +35,27 @@ app-nav {
   }
 }
 
+mat-form-field {
+  .mat-mdc-form-field-subscript-wrapper  {
+    height: 1em;
+  }
+  .mat-mdc-select-value-text{
+    font-size: 1em;
+  }
+  .mat-mdc-text-field-wrapper {
+    height: 3em;
+  }
+}
+
 /* tablets */
-@media (max-width:768px) {
-  .mat-mdc-select {
-    font-size: 6px !important;
+@media (max-width:915px) {
+  mat-form-field {
+    .mat-mdc-form-field-subscript-wrapper  {
+      height: 1em;
+    }
+    .mat-mdc-select-value-text{
+      font-size: .9em;
+    }
   }
   app-nav {
     &.hide {
@@ -45,5 +66,12 @@ app-nav {
 
 /* mobils */
 @media (max-width:520px) {
-
+  mat-form-field {
+    .mat-mdc-form-field-subscript-wrapper  {
+      height: 0em;
+    }
+    .mat-mdc-select-value-text{
+      font-size: .8em;
+    }
+  }
 }
