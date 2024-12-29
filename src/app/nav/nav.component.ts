@@ -96,18 +96,10 @@ export class NavComponent implements OnInit, OnDestroy, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.inputs = [this.restaurantSelect, this.cuisineSelect, this.boroughSelect, this.streetSelect, this.distanceSlider]
-    // for (let select of inputs) {
-    //   select.onChange()
-    // }
   }
 
   public onChangeSelectValue(a_value: any, origin: string) {
-    // if (!a_value) { return }
     if (origin !== 'restaurant') {
-      if (this.target) {
-        // this.distanceSlider.disabled = false
-        this.mapService.targetHalo.next(this.distanceControl.value!)
-      }
       switch (origin) {
         case 'cuisine':
         case 'borough':
@@ -120,18 +112,17 @@ export class NavComponent implements OnInit, OnDestroy, AfterViewInit {
           this.restaurantConf = { ...this.restaurantConf }
           this.onFilterChange.emit()
           break
+        case 'distance':
+          if (this.target) {
+            this.mapService.targetHalo.next(this.distanceControl.value!)
+          }
       }
-    } else {
-      // this.distanceSlider.disabled = this.target ? false : true
     }
-    // const blankInputs = this.inputs.filter(sel => sel.label!==a_value['name'])
   }
 
 
 
-  public onSubmit() {
-
-  }
+  public onSubmit() {}
 
   public toggleNav(a_event: MouseEvent) {
     a_event.stopPropagation()

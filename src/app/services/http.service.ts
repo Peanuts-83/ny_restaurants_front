@@ -74,7 +74,17 @@ export class HttpService {
     } else {
       // CombinedFilter
       (<CombinedFilter>a_filters).filter_elements = (<CombinedFilter>a_filters).filter_elements.filter(f => f.field!==a_field)
-      return a_filters
+      let l_filters = <CombinedFilter>a_filters
+      if (l_filters.filter_elements.length > 1) {
+        return l_filters
+      } else if (l_filters.filter_elements.length > 0) {
+        return <SingleFilter>{
+          field: l_filters.filter_elements[0].field,
+          operator_field: l_filters.filter_elements[0].operator_field,
+          value: l_filters.filter_elements[0].value,
+        }
+      }
+      return undefined
     }
   }
 

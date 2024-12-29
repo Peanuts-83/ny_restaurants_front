@@ -141,9 +141,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       if (result) {
         this.haloMarkerCircle.value?.setRadius(result)
         this.haloMarkerCircle.value?.addTo(this.map)
-        if (this.restaurantList?.length === 0 && this.canShowHalo) {
-          this.doLoadHaloRestaurants()
-        }
+        this.doLoadHaloRestaurants()
       }
     }))
     // halo show and corresponding restaurants show
@@ -154,9 +152,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         } else {
           this.doRemoveMarker(undefined, true)
         }
-        if (this.restaurantList?.length === 0 && this.canShowHalo) {
-          this.doLoadHaloRestaurants()
-        }
+        this.doLoadHaloRestaurants()
       } else {
         this.doRemoveMarker(undefined, true)
       }
@@ -168,18 +164,20 @@ export class MapComponent implements AfterViewInit, OnDestroy {
    * if no restaurant is selected by user.
    */
   public doLoadHaloRestaurants() {
-    const apiService = this.restaurantListService
-    const apiParams: AppHttpParams = {
-      ...apiService.listParams.value,
-      nbr: 0, // get all
-      page_nbr: 1,
-      filters: this.httpService.setFilter(Object.values(this.haloMarkerCircle.value!.getLatLng()).reverse(), this.haloMarkerCircle.value?.getRadius()!, OpField.GEO, this.restaurantListService.listParams.value.filters)
+    if (this.restaurantList?.length === 0 && this.canShowHalo) {
+      const apiService = this.restaurantListService
+      const apiParams: AppHttpParams = {
+        ...apiService.listParams.value,
+        nbr: 0, // get all
+        page_nbr: 1,
+        filters: this.httpService.setFilter(Object.values(this.haloMarkerCircle.value!.getLatLng()).reverse(), this.haloMarkerCircle.value?.getRadius()!, OpField.GEO, this.restaurantListService.listParams.value.filters)
+      }
+      apiService.doPost<Restaurant[]>(apiService.apiConf.baseApi, apiParams).subscribe(result => {
+        this.haloRestaurantList = result.data
+        this.doRemoveMarker(undefined, true)
+        this.haloRestaurantList.forEach(restaurant => this.doCreateMarker(restaurant, false, true))
+      })
     }
-    apiService.doPost<Restaurant[]>(apiService.apiConf.baseApi, apiParams).subscribe(result => {
-      this.haloRestaurantList = result.data
-      this.doRemoveMarker(undefined, true)
-      this.haloRestaurantList.forEach(restaurant => this.doCreateMarker(restaurant, false, true))
-    })
   }
 
   ngOnDestroy(): void {
