@@ -16,6 +16,7 @@ import { MatSelectModule } from '@angular/material/select'
 import { MatCheckbox } from '@angular/material/checkbox'
 import { MatProgressSpinner } from '@angular/material/progress-spinner'
 import { MatInput } from '@angular/material/input'
+import {MatSlideToggleModule} from '@angular/material/slide-toggle';
 
 
 @NgModule({
@@ -35,6 +36,7 @@ import { MatInput } from '@angular/material/input'
     MatSelectModule,
     MatSliderModule,
     MatCheckbox,
+    MatSlideToggleModule,
     MatProgressSpinner
   ],
   providers: [

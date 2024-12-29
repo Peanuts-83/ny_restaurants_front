@@ -83,10 +83,26 @@ app-infinite-select {
 }
 .col.distance {
   display: flex;
-  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   padding: 10px 0;
-  .dist-label {
-    text-align: center;
+  .slider {
+    width: calc(100% - 20px);
+    margin: 0 20px;
+  }
+  .slide-toggle {
+    background-color: black;
+    padding: 2px 7px;
+    border-radius: 15px;
+    opacity: 50%;
+    margin-top: -10px;
+    &.active {
+      opacity: 100%;
+    }
+    .halo-text {
+      font-size: 1em;
+      color: white;
+    }
   }
 }
 
