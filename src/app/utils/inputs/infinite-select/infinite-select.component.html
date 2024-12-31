@@ -1,5 +1,5 @@
 @if (control) {
-<div class="infinite-scroll-select" >
+<div class="infinite-scroll-select">
   <input matInput #searchInput [formControl]="searchControl" id="searchInput" [class.show]="opened"
     placeholder="Search" />
   <mat-form-field [class.hide-label]="opened">
@@ -9,18 +9,33 @@
     </div>
     }
     <mat-label>{{label}}</mat-label>
-    <mat-select [formControl]="control" [compareWith]="compareControlValues" (selectionChange)="onChange($event.value);" (openedChange)="onSwitch($event)" >
+    @if (config.isMulti) {
+    <mat-select [formControl]="control" [compareWith]="compareControlValues" (selectionChange)="onChange($event.value);"
+      (openedChange)="onSwitch($event)" multiple>
       <mat-option>-</mat-option>
-      @for (item of items; track $index;) {
+      @for (item of items; track item;) {
       <mat-option [value]="item">
         {{ item.name }}
         @if(item.borough) {
-          <span class="borough">- {{item.borough}}</span>
+        <span class="borough">- {{item.borough}}</span>
         }
       </mat-option>
       }
-
     </mat-select>
+    } @else {
+    <mat-select [formControl]="control" [compareWith]="compareControlValues" (selectionChange)="onChange($event.value);"
+      (openedChange)="onSwitch($event)">
+      <mat-option>-</mat-option>
+      @for (item of items; track item;) {
+      <mat-option [value]="item">
+        {{ item.name }}
+        @if(item.borough) {
+        <span class="borough">- {{item.borough}}</span>
+        }
+      </mat-option>
+      }
+    </mat-select>
+    }
   </mat-form-field>
   <!-- <pre>{{searchInput.value}}</pre> -->
 </div>

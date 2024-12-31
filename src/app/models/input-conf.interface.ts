@@ -6,3 +6,7 @@ export interface InputConf {
   params: AppHttpParams
   formControl: string
 }
+
+export interface SelectConf extends InputConf {
+  isMulti?: boolean
+}

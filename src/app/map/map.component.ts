@@ -19,29 +19,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private subs: Subscription[] = []
   private map!: Map
 
-  private _restaurantList: Restaurant[] = []
-  /** restaurant list selected by user */
-  public get restaurantList(): Restaurant[] {
-    return this._restaurantList
-  }
-  public set restaurantList(value: Restaurant[]) {
-    if (value !== this._restaurantList) {
-      let diff: Restaurant[] = []
-      if (value?.length > this._restaurantList.length) {
-        diff = this.getDiff(value, this._restaurantList)
-        diff.forEach((restaurant, i, arr) => this.doCreateMarker(restaurant, i === arr.length - 1))
-      } else {
-        this.doRemoveMarker()
-      }
-      this._restaurantList = value
-    }
-  }
-
   /** markers list selected by user */
   private _markers: Marker[] = []
 
   /** map option */
-  public oneMarker = false
+  public oneMarker = true
 
   private _targetMarker!: Marker|undefined
   /** target for user position */
@@ -145,7 +127,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       }
     }))
     // halo show and corresponding restaurants show
-    this.haloMarkerCircle.subscribe(result => {
+    this.subs.push(this.haloMarkerCircle.subscribe(result => {
       if (result) {
         if (this.haloRestaurantList?.length > 0) {
           this.haloRestaurantList.forEach(restaurant => this.doCreateMarker(restaurant, false, true))
@@ -156,7 +138,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       } else {
         this.doRemoveMarker(undefined, true)
       }
-    })
+    }))
   }
 
   /**
@@ -164,7 +146,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
    * if no restaurant is selected by user.
    */
   public doLoadHaloRestaurants() {
-    if (this.restaurantList?.length === 0 && this.canShowHalo) {
+    if (this.canShowHalo) {
       const apiService = this.restaurantListService
       const apiParams: AppHttpParams = {
         ...apiService.listParams.value,
@@ -184,14 +166,12 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.subs.forEach(s => s.unsubscribe())
   }
 
-  /** add some restaurant */
+  /** selected restaurant */
   @Input() set restaurant(a_value: Restaurant) {
-    if (a_value && !this.restaurantList.map(r => JSON.stringify(r)).includes(JSON.stringify(a_value))) {
-      this.restaurantList = [...this.restaurantList, a_value]
-      // move to restaurant map zone > passer à un mode de visualisation englobant tous les restaurants affichés
+    if (a_value) {
+      this.doRemoveMarker()
       this.map.setView(this.mapService.coordToLeaflet(a_value.address.coord), 16)
-    } else {
-      this.restaurantList = []
+      this.doCreateMarker(a_value, true)
     }
   }
 

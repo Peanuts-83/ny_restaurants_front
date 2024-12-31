@@ -2,7 +2,7 @@ import { InfiniteSelectComponent } from './../utils/inputs/infinite-select/infin
 import { SortWay } from './../models/filter-params.interface'
 import { AfterViewInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core'
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
-import { InputConf } from '../models/input-conf.interface'
+import { SelectConf } from '../models/input-conf.interface'
 import { BoroughDistinctService } from './services/borough-distinct.service'
 import { RestaurantDistinctService } from './services/restaurant-distinct.service'
 import { RestaurantListService } from './services/restaurant-list.service'
@@ -36,20 +36,17 @@ export class NavComponent implements OnInit, OnDestroy, AfterViewInit {
   /**
    * Select configs
    */
-  public restaurantConf: InputConf = { service: this.restaurantListService, params: this.restaurantListService.listParams.value /**{ sort: { field: 'name', way: SortWay.ASC } }*/, formControl: 'restaurant' }
-  public boroughConf: InputConf = { service: this.restaurantDistinctService, params: { sort: { field: 'borough', way: SortWay.ASC } }, formControl: 'borough' }
-  public streetConf: InputConf = { service: this.restaurantDistinctService, params: { sort: { field: 'address.street', way: SortWay.ASC } }, formControl: 'street' }
-  public cuisineConf: InputConf = { service: this.restaurantDistinctService, params: { sort: { field: 'cuisine', way: SortWay.ASC } }, formControl: 'cuisine' }
+  public restaurantConf: SelectConf = { service: this.restaurantListService, params: this.restaurantListService.listParams.value /**{ sort: { field: 'name', way: SortWay.ASC } }*/, formControl: 'restaurant'}
+  public boroughConf: SelectConf = { service: this.restaurantDistinctService, params: { sort: { field: 'borough', way: SortWay.ASC } }, formControl: 'borough' }
+  public cuisineConf: SelectConf = { service: this.restaurantDistinctService, params: { sort: { field: 'cuisine', way: SortWay.ASC } }, formControl: 'cuisine' }
 
   constructor(private fb: FormBuilder, public boroughDistinctService: BoroughDistinctService, public restaurantDistinctService: RestaurantDistinctService, public restaurantListService: RestaurantListService, public mapService: MapService, private httpService: HttpService) {
     this.subs.push(this.mapService.target.subscribe(result => {
       if (this.distanceSlider) {
         if (result) {
           this.target = result
-          // this.distanceSlider.disabled = false
         } else {
           this.target = undefined
-          // this.distanceSlider.disabled = true
         }
       }
     }))
@@ -68,14 +65,6 @@ export class NavComponent implements OnInit, OnDestroy, AfterViewInit {
     })
     this.subs.push(this.form.get('restaurant')!.valueChanges.subscribe(control => {
       this.onRestaurantChange.emit(control)
-      if (control !== undefined && control !== null) {
-        this.form.patchValue({
-          borough: { name: control.borough },
-          street: { name: control.address.street },
-          cuisine: { name: control.cuisine },
-          grades: { name: control.grades }
-        })
-      }
     }))
   }
 
@@ -104,6 +93,7 @@ export class NavComponent implements OnInit, OnDestroy, AfterViewInit {
         case 'cuisine':
         case 'borough':
           this.form.get('restaurant')?.setValue(null)
+          this.restaurantSelect.searchControl.setValue(null)
           if (a_value?.name) {
             this.restaurantListService.listParams.next({ ...this.restaurantListService.listParams.value, page_nbr: 1, filters: this.httpService.setFilter(origin, a_value.name, undefined, this.restaurantConf.params.filters) })
           } else if (this.httpService.isFilter(origin, this.restaurantListService.listParams.value.filters)) {
@@ -118,11 +108,20 @@ export class NavComponent implements OnInit, OnDestroy, AfterViewInit {
           }
       }
     }
+    // set search of empty select to null
+    if (a_value === undefined && origin !== 'distance') {
+      const selects: {[key:string]: InfiniteSelectComponent<any>} = {
+        restaurant: this.restaurantSelect,
+        cuisine: this.cuisineSelect,
+        borough: this.boroughSelect
+      };
+      selects[origin].searchInput.value = null
+    }
   }
 
 
 
-  public onSubmit() {}
+  public onSubmit() { }
 
   public toggleNav(a_event: MouseEvent) {
     a_event.stopPropagation()

@@ -2,12 +2,10 @@ import { Component, Input, OnDestroy, OnInit, ViewChild, forwardRef, ViewEncapsu
 import { ControlValueAccessor, FormControl, FormGroup, NG_VALUE_ACCESSOR, NgControl } from '@angular/forms'
 import { MatInput } from '@angular/material/input'
 import { MatSelect } from '@angular/material/select'
-import { resourceUsage } from 'process'
-import { BehaviorSubject, Subscription, debounceTime, distinctUntilChanged, firstValueFrom, of, switchMap } from 'rxjs'
+import { BehaviorSubject, Subscription, debounceTime, distinctUntilChanged, of, switchMap } from 'rxjs'
 import { FilterParams, OpField, SortParams } from 'src/app/models/filter-params.interface'
-import { InputConf } from 'src/app/models/input-conf.interface'
+import { InputConf, SelectConf } from 'src/app/models/input-conf.interface'
 import { BaseApiService, HTTPResponse } from 'src/app/services/base-api.service'
-import { API, OPERATOR } from 'src/app/services/http.service'
 import { InfiniteScrollService } from 'src/app/services/infinite-scroll.service'
 
 
@@ -41,6 +39,7 @@ export class InfiniteSelectComponent<T extends { name: string, borough?: string,
   public isLoading = false
   public opened: boolean = false
   private endScroll = false
+  public multi?: boolean
 
   @Input()
   parentForm!: FormGroup
@@ -107,23 +106,24 @@ export class InfiniteSelectComponent<T extends { name: string, borough?: string,
   @Input()
   public formControlName!: string
 
-  private _config!: InputConf
+  private _config!: SelectConf
   /**
    * Select config
    * @param service: ApiService.
    * @param params: AppHttpParams (nb/page_nbr/filters/sort)
    */
   @Input()
-  set config(value: InputConf) {
+  set config(value: SelectConf) {
     if (value && this._config!==value) {
       this._config = value
       this.nbr.next(this.config.params.nbr || 10)
       this.pageNbr.next(this.config.params.page_nbr || 1)
       this.filters.next(this.config.params.filters)
       this.sort.next(this.config.params.sort)
+      this.multi = value.isMulti
     }
   }
-  get config(): InputConf {
+  get config(): SelectConf {
     return this._config
   }
 

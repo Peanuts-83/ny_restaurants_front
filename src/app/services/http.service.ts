@@ -1,5 +1,6 @@
+import { FilterParams } from './../models/filter-params.interface'
 import { HttpClient } from '@angular/common/http'
-import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core'
 import { Observable } from 'rxjs'
 import { AppHttpParams, CombinedFilter, Operator, OpField, SingleFilter } from '../models/filter-params.interface'
 import { HTTPResponse } from './base-api.service'
@@ -9,12 +10,12 @@ import { HTTPResponse } from './base-api.service'
 })
 export class HttpService {
   private baseUrl = 'http://127.0.0.1:8000'
-  private requestOptions = { withCredentials: true}
+  private requestOptions = { withCredentials: true }
 
   constructor(private http: HttpClient) { }
 
-  public post<T>(a_url:string, a_params?: AppHttpParams): Observable<HTTPResponse<T>> {
-    return this.http.post<HTTPResponse<T>>(this.baseUrl + a_url, {params: a_params}, this.requestOptions)
+  public post<T>(a_url: string, a_params?: AppHttpParams): Observable<HTTPResponse<T>> {
+    return this.http.post<HTTPResponse<T>>(this.baseUrl + a_url, { params: a_params }, this.requestOptions)
   }
 
   /**
@@ -24,39 +25,52 @@ export class HttpService {
    * @param a_filters
    * @returns SingleFilter|CombinedFilter|undefined
    */
-  public setFilter(a_field: any, a_value:string|number, a_operatorField?:OpField, a_filters?: SingleFilter|CombinedFilter): SingleFilter|CombinedFilter|undefined {
+  public setFilter(a_field: any, a_value: string | number, a_operatorField?: OpField, a_filters?: SingleFilter | CombinedFilter): SingleFilter | CombinedFilter | undefined {
+    // cuisine & borough filters erase name filter
+    if (['borough', 'cuisine'].includes(a_field) && a_filters) {
+      if ((<SingleFilter>a_filters).field && (<SingleFilter>a_filters).field === 'name') {
+        a_filters = undefined
+      } else if ((<CombinedFilter>a_filters).filter_elements) {
+        (<CombinedFilter>a_filters).filter_elements = (<CombinedFilter>a_filters).filter_elements.filter(f => f.field !== 'name')
+      }
+    }
     if (!a_filters) {
+      // no filter > create Singlefilter
       return <SingleFilter>{
         field: a_field,
         operator_field: a_operatorField || OpField.EQ,
         value: a_value
       }
     } else if (Object.keys(a_filters).includes('field')) {
-    // SingleFilter > pass to CombinedFilter
-     const result =  <CombinedFilter>{
-      filter_elements: [
-        <SingleFilter>a_filters,
-        {
-          field: a_field,
-          operator_field: a_operatorField || OpField.EQ,
-          value: a_value}
-      ],
-      operator: Operator.AND
-     };
-     (<CombinedFilter>result).filter_elements = result.filter_elements.filter((f,i,arr)=> !arr.slice(i+1).some(el => el.field===f.field))
-     return result
+      // SingleFilter > pass to CombinedFilter
+      const result = <CombinedFilter>{
+        filter_elements: [
+          <SingleFilter>a_filters,
+          {
+            field: a_field,
+            operator_field: a_operatorField || OpField.EQ,
+            value: a_value
+          }
+        ],
+        operator: Operator.AND
+      };
+      // no duplicates & last kept first
+      (<CombinedFilter>result).filter_elements = result.filter_elements.filter((f, i, arr) => !arr.slice(i + 1).some(el => el.field === f.field))
+      return result
     } else {
       // CombinedFilter
       const result = {
         filter_elements: [...(<CombinedFilter>a_filters).filter_elements,
-          {
-            field: a_field,
-            operator_field: a_operatorField || OpField.EQ,
-            value: a_value}
+        {
+          field: a_field,
+          operator_field: a_operatorField || OpField.EQ,
+          value: a_value
+        }
         ],
         operator: Operator.AND
       };
-      (<CombinedFilter>result).filter_elements = result.filter_elements.filter((f,i,arr)=> !arr.slice(i+1).some(el => el.field===f.field))
+      // no duplicates & last kept first
+      (<CombinedFilter>result).filter_elements = result.filter_elements.filter((f, i, arr) => !arr.slice(i + 1).some(el => el.field === f.field))
       return result
     }
   }
@@ -67,13 +81,13 @@ export class HttpService {
    * @param a_filters
    * @returns SingleFilter|CombinedFilter|undefined
    */
-  public unsetFilter(a_field: string, a_filters?: SingleFilter|CombinedFilter): SingleFilter|CombinedFilter|undefined {
+  public unsetFilter(a_field: string, a_filters?: SingleFilter | CombinedFilter): SingleFilter | CombinedFilter | undefined {
     if (!a_filters || (a_filters && Object.keys(a_filters).includes('field'))) {
       // SingleFilter
       return undefined
     } else {
       // CombinedFilter
-      (<CombinedFilter>a_filters).filter_elements = (<CombinedFilter>a_filters).filter_elements.filter(f => f.field!==a_field)
+      (<CombinedFilter>a_filters).filter_elements = (<CombinedFilter>a_filters).filter_elements.filter(f => f.field !== a_field)
       let l_filters = <CombinedFilter>a_filters
       if (l_filters.filter_elements.length > 1) {
         return l_filters
@@ -94,7 +108,7 @@ export class HttpService {
    * @param a_filters
    * @returns boolean
    */
-  public isFilter(a_field: string, a_filters?: SingleFilter|CombinedFilter): boolean {
+  public isFilter(a_field: string, a_filters?: SingleFilter | CombinedFilter): boolean {
     if (!a_filters) {
       return false
     } else {
