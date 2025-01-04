@@ -53,6 +53,19 @@
   }
 }
 
+.route-path {
+  &:before {
+    stroke: red;
+  }
+}
+
+.leaflet-routing-container {
+  top: 145px;
+  &.leaflet-up {
+    top: 0;
+  }
+}
+
 /* tablets */
 @media (max-width:915px) {
 
@@ -62,5 +75,31 @@
 @media (max-width:520px) {
   .nav-target {
     margin-bottom: 30px;
+  }
+  .leaflet-top.leaflet-right {
+    max-width: calc(100% - 78px);
+  }
+  .leaflet-routing-container {
+    top: 275px;
+    right: 3px;
+    &.leaflet-up {
+      top: 25px;
+    }
+  }
+}
+
+@media (max-width:320px) {
+  .leaflet-top.leaflet-right {
+    max-width: calc(100% - 7px);
+    &.leaflet-up {
+      top: 55px;
+    }
+  }
+  .leaflet-routing-container {
+    top: 285px;
+    right: 3px;
+    &.leaflet-up {
+      top: 35px;
+    }
   }
 }

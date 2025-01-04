@@ -136,11 +136,25 @@ app-infinite-select {
       padding: 10px 0 0 80px;
       font-size: xx-large;
       transform: rotate(-6deg);
-      animation: earthquake 0.1s ease-in-out 25;
+      animation: earthquake 0.1s ease-in-out 18;
     }
   }
 }
 
+@media (max-width:320px) {
+  .bottom-nav .nav-toggle .hulk {
+    img {
+      width: 40px;
+    }
+    .title {
+      padding: 0 0 0 40px;
+      margin-top: -18px;
+      font-size: large;
+      transform: rotate(-6deg);
+      animation: earthquake 0.1s ease-in-out 12;
+    }
+  }
+}
 
 /* Earthquake animation */
 @keyframes earthquake {

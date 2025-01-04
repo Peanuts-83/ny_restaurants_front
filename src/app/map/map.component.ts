@@ -1,13 +1,22 @@
-import { FilterParams } from 'src/app/models/filter-params.interface'
 import { RestaurantListService } from './../nav/services/restaurant-list.service'
 import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnDestroy, Output, TemplateRef, ViewChild, ViewContainerRef, ViewEncapsulation } from '@angular/core'
 import { MapService } from '../services/map.service'
+import * as L from "leaflet";
 import { LatLng, LeafletMouseEvent, Map, Marker, marker, icon, circle, Circle } from 'leaflet'
 import { BehaviorSubject, Subscription } from 'rxjs'
 import { optionMarker, Restaurant } from '../models/restaurant.interface'
-import { AppHttpParams, OpField, SingleFilter } from '../models/filter-params.interface'
+import { AppHttpParams, OpField } from '../models/filter-params.interface'
 import { __asyncValues } from 'tslib'
 import { HttpService } from '../services/http.service'
+// import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
+import "leaflet-routing-machine";
+
+const lineOptions: L.Routing.LineOptions = {
+  styles: [{color: 'green', opacity: 1, weight: 3, stroke: true, className: 'route-path', lineCap: 'butt', lineJoin: 'round', dashArray: [3,7], bubblingMouseEvents: true}],
+  addWaypoints: true,
+  extendToWaypoints: true,
+  missingRouteTolerance: 3
+}
 
 @Component({
   selector: 'app-map',
@@ -18,6 +27,7 @@ import { HttpService } from '../services/http.service'
 export class MapComponent implements AfterViewInit, OnDestroy {
   private subs: Subscription[] = []
   private map!: Map
+  private routePath!: L.Routing.Control
 
   /** markers list selected by user */
   private _markers: Marker[] = []
@@ -55,6 +65,23 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   /** target & halo shown? */
   public canSetPosition = false
   public positionActive = false
+
+  private _showNav!: boolean
+  @Input()
+  set showNav(value: boolean) {
+    this._showNav = value
+    const routingContainer: HTMLDivElement[] = this.elementRef.nativeElement.getElementsByClassName('leaflet-routing-container')
+    if (routingContainer.length>0) {
+      if (!value) {
+        routingContainer[0].className = 'leaflet-routing-container leaflet-bar leaflet-control leaflet-up'
+      } else {
+        routingContainer[0].className = 'leaflet-routing-container leaflet-bar leaflet-control'
+      }
+    }
+  }
+  get showNav(): boolean {
+    return this._showNav
+  }
 
   private _canShowHalo = false
   @Input()
@@ -104,7 +131,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   public popupTemplate!: TemplateRef<HTMLElement>
 
 
-  constructor(private mapService: MapService, private viewContainerRef: ViewContainerRef, public restaurantListService: RestaurantListService, public httpService: HttpService) { }
+  constructor(private mapService: MapService, private elementRef: ElementRef, public restaurantListService: RestaurantListService, public httpService: HttpService) { }
 
 
   ngAfterViewInit() {
@@ -214,7 +241,22 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       this._haloMarkerList.push(l_marker)
     } else {
       this._markers.push(l_marker)
+      // L.Routing.line.control()
+      this.doRouteMarker(l_marker.getLatLng())
     }
+  }
+
+  public doRouteMarker(a_to: LatLng, a_from?: LatLng) {
+    this.routePath && this.map.removeControl(this.routePath)
+    a_from = a_from || this.targetMarker!.getLatLng()
+    this.routePath = L.Routing.control({
+      waypoints: [
+        L.latLng(a_from),
+        L.latLng(a_to)
+      ],
+      routeWhileDragging: true, lineOptions
+    })
+    this.routePath.addTo(this.map)
   }
 
   /**
