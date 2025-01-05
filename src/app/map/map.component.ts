@@ -1,5 +1,5 @@
 import { RestaurantListService } from './../nav/services/restaurant-list.service'
-import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnDestroy, Output, TemplateRef, ViewChild, ViewContainerRef, ViewEncapsulation } from '@angular/core'
+import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnDestroy, Output, TemplateRef, ViewChild, ViewEncapsulation } from '@angular/core'
 import { MapService } from '../services/map.service'
 import * as L from "leaflet";
 import { LatLng, LeafletMouseEvent, Map, Marker, marker, icon, circle, Circle } from 'leaflet'
@@ -242,21 +242,30 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     } else {
       this._markers.push(l_marker)
       // L.Routing.line.control()
-      this.doRouteMarker(l_marker.getLatLng())
+      this.doRouteMarker(this._markers[0].getLatLng())
     }
   }
 
+  /**
+   * Make route from/to
+   * @param a_to
+   * @param a_from
+   */
   public doRouteMarker(a_to: LatLng, a_from?: LatLng) {
-    this.routePath && this.map.removeControl(this.routePath)
-    a_from = a_from || this.targetMarker!.getLatLng()
-    this.routePath = L.Routing.control({
-      waypoints: [
-        L.latLng(a_from),
-        L.latLng(a_to)
-      ],
-      routeWhileDragging: true, lineOptions
-    })
-    this.routePath.addTo(this.map)
+    if (a_from || this.targetMarker) {
+      this.routePath && this.map.removeControl(this.routePath)
+      a_from = a_from || this.targetMarker!.getLatLng()
+      this.routePath = L.Routing.control({
+        waypoints: [
+          L.latLng(a_from),
+          L.latLng(a_to)
+        ],
+        routeWhileDragging: true,
+        // showAlternatives: true,
+        lineOptions
+      })
+      this.routePath.addTo(this.map)
+    }
   }
 
   /**
@@ -284,12 +293,10 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   public doToggleTarget(a_event?:MouseEvent) {
     a_event?.stopPropagation()
     if (this.targetMarker) {
-      this.map.removeLayer(this.targetMarker)
-      this.doRemoveMarker(undefined, true)
-      this.targetMarker = undefined
       this.positionActive = false
       this.canSetPosition = false
       this.doToggleHalo()
+      this.doSetTarget()
     } else {
       this.canSetPosition = true
     }
@@ -304,18 +311,35 @@ export class MapComponent implements AfterViewInit, OnDestroy {
    * Map click event for user position simulation
    * @param a_event
    */
-  public doSetTarget(a_event: LeafletMouseEvent) {
-    this.doCreateTarget(a_event.latlng)
+  public doSetTarget(a_event?: LeafletMouseEvent) {
+    if (a_event) {
+      this.doCreateTarget(a_event.latlng)
+    } else if (!this.positionActive) {
+      this.doRemoveTarget()
+    }
   }
 
   /**
-   * Create target on map
+   * Remove target user position from map
+   */
+  doRemoveTarget() {
+    if (this.targetMarker && !this.positionActive) {
+      this.doRemoveMarker(this.targetMarker)
+      this.routePath && this.map.removeControl(this.routePath)
+      this.map.removeLayer(this.targetMarker)
+      this.doRemoveMarker(undefined, true)
+      this.targetMarker = undefined
+    }
+  }
+
+  /**
+   * Create target user position on map
    * @param a_coord
    * @param a_options
    */
   public doCreateTarget(a_coord: LatLng) {
     // remove initial target if exist
-    this.targetMarker && this.doRemoveMarker(this.targetMarker)
+    this.doRemoveTarget()
     this.haloMarkerCircle.value && this.map.removeLayer(this.haloMarkerCircle.value!)
     const targetIcon = icon({
       className: 'target-icon',
@@ -342,5 +366,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       this.haloMarkerCircle.value!.addTo(this.map)
     }
     this.canSetPosition = false
+    if (this._markers?.length>0) {
+      this.doRouteMarker(this._markers[0].getLatLng())
+    }
   }
 }
