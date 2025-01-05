@@ -12,7 +12,7 @@ import { HttpService } from '../services/http.service'
 import "leaflet-routing-machine";
 
 const lineOptions: L.Routing.LineOptions = {
-  styles: [{color: 'green', opacity: 1, weight: 3, stroke: true, className: 'route-path', lineCap: 'butt', lineJoin: 'round', dashArray: [3,7], bubblingMouseEvents: true}],
+  styles: [{color: 'green', opacity: 1, weight: 3, stroke: true, className: 'route-path', lineCap: 'round', lineJoin: 'round', dashArray: [3,7], bubblingMouseEvents: true}],
   addWaypoints: true,
   extendToWaypoints: true,
   missingRouteTolerance: 3
@@ -237,34 +237,15 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     const l_marker = marker(l_coord).addTo(this.map)
     l_options?.popupContent && showPopup && l_marker.bindPopup(l_options.popupContent).openPopup() || l_marker.bindPopup(l_options.popupContent)
     l_options?.tooltipContent && l_marker.bindTooltip(l_options.tooltipContent)
+    // make route to target on click
+    l_marker.addEventListener('mouseup', (e: LeafletMouseEvent) => {
+      this.doRouteMarker(e.latlng)
+    })
     if (isHalo) {
       this._haloMarkerList.push(l_marker)
     } else {
       this._markers.push(l_marker)
-      // L.Routing.line.control()
       this.doRouteMarker(this._markers[0].getLatLng())
-    }
-  }
-
-  /**
-   * Make route from/to
-   * @param a_to
-   * @param a_from
-   */
-  public doRouteMarker(a_to: LatLng, a_from?: LatLng) {
-    if (a_from || this.targetMarker) {
-      this.routePath && this.map.removeControl(this.routePath)
-      a_from = a_from || this.targetMarker!.getLatLng()
-      this.routePath = L.Routing.control({
-        waypoints: [
-          L.latLng(a_from),
-          L.latLng(a_to)
-        ],
-        routeWhileDragging: true,
-        // showAlternatives: true,
-        lineOptions
-      })
-      this.routePath.addTo(this.map)
     }
   }
 
@@ -290,6 +271,34 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+
+  /**
+   * Make route from/to
+   * @param a_to
+   * @param a_from
+   */
+  public doRouteMarker(a_to: LatLng, a_from?: LatLng) {
+    if (a_from || this.targetMarker) {
+      this.routePath && this.map.removeControl(this.routePath)
+      a_from = a_from || this.targetMarker!.getLatLng()
+      this.routePath = L.Routing.control({
+        waypoints: [
+          L.latLng(a_from),
+          L.latLng(a_to)
+        ],
+        routeWhileDragging: true,
+        // showAlternatives: true,
+        lineOptions
+      })
+      this.routePath.addTo(this.map)
+      this.routePath.getPlan()
+    }
+  }
+
+  /**
+   * Target on/off
+   * @param a_event
+   */
   public doToggleTarget(a_event?:MouseEvent) {
     a_event?.stopPropagation()
     if (this.targetMarker) {
@@ -302,6 +311,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     }
   }
 
+  // Halo on/off
   public doToggleHalo() {
     this.map?.removeLayer(this.haloMarkerCircle.value!)
     this.haloRestaurantList = []
@@ -366,6 +376,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       this.haloMarkerCircle.value!.addTo(this.map)
     }
     this.canSetPosition = false
+    // make route to target if restaurant selected
     if (this._markers?.length>0) {
       this.doRouteMarker(this._markers[0].getLatLng())
     }
