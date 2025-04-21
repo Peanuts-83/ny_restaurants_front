@@ -14,7 +14,8 @@ export class AppComponent {
   public restaurant!:Restaurant
 
   public showNav = true
-  public showHalo!: boolean
+  public showHalo = true
+  public canShowHalo = true
 
   public updateHaloMarkers() {
     this.mapComp.doLoadHaloRestaurants()

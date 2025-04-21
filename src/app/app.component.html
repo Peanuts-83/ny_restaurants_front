@@ -4,7 +4,8 @@
     (onToggleNav)="showNav=!showNav"
     [ngClass]="{hide:!showNav}"
     [(showHalo)]="showHalo"
+    [(canShowHalo)]="canShowHalo"
     (onFilterChange)="updateHaloMarkers()"
     ></app-nav>
-  <app-map [restaurant]="restaurant" [(canShowHalo)]="showHalo" [showNav]="showNav"></app-map>
+  <app-map [restaurant]="restaurant" [(canShowHalo)]="canShowHalo" [showNav]="showNav"></app-map>
 <!-- </div> -->

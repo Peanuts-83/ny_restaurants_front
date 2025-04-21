@@ -18,14 +18,14 @@
       </div>
       <div class="col distance" [title]="target===undefined ? 'Set user position first':''">
         <mat-slider class="slider" min="50" max="3050" step="150" color="accent" showTickMarks label="distance"
-          placeholder="Distance" type="number" [disabled]="target===undefined || canUseHalo===false" discrete
+          placeholder="Distance" type="number" [disabled]="target===undefined || canShowHalo===false" discrete
           #distanceSlider>
           <input matSliderThumb #distanceInput (valueChange)="onChangeSelectValue($event, 'distance')"
             formControlName="distance">
         </mat-slider>
-        <div class="slide-toggle" [ngClass]="{active: canUseHalo}">
-          <mat-slide-toggle [checked]="canUseHalo" (change)="canUseHalo=!canUseHalo;showHaloChange.emit(canUseHalo);"
-            [disabled]="target===undefined" id="canUseHalo">
+        <div class="slide-toggle" [ngClass]="{active: canShowHalo}">
+          <mat-slide-toggle [checked]="canShowHalo" (change)="canShowHalo=!canShowHalo;showHaloChange.emit(canShowHalo);"
+            [disabled]="target===undefined" (click)="canShowHaloChange.emit(canShowHalo)">
             <div class="slide-toggle-txt">
               <i class="material-icons">radar</i>
               <div class="halo-text"> Proximity radar</div>

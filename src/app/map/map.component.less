@@ -39,8 +39,9 @@
   z-index: 1000;
   bottom: 10px;
   left: 10px;
+  cursor: pointer;
   &.active, &:hover {
-    filter: drop-shadow(0 0 3px crimson);
+    filter: drop-shadow(0 0 3px #F50057);
   }
   .target-text{
     background: black !important;
@@ -60,6 +61,18 @@
 }
 
 .leaflet-routing-container {
+  background-color: white;
+  padding: 10px;
+  position: relative;
+  .leaflet-routing-collapse-btn, .leaflet-routing-container-hide .leaflet-routing-collapse-btn  {
+    position: absolute !important;
+    top: 2px;
+    right: 2px;
+    padding: 0 10px;
+  }
+  td {
+    cursor: pointer;
+  }
   top: 145px;
   &.leaflet-up {
     top: 0;
@@ -96,10 +109,10 @@
     }
   }
   .leaflet-routing-container {
-    top: 285px;
+    top: 275px;
     right: 3px;
     &.leaflet-up {
-      top: 35px;
+      top: 25px;
     }
   }
 }

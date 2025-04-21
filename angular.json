@@ -17,9 +17,21 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/ny_restaurants_front",
+            "outputPath": "dist/",
             "index": "src/index.html",
             "main": "src/main.ts",
+            "budgets": [
+              {
+                "type": "initial",
+                "maximumWarning": "500kb",
+                "maximumError": "1mb"
+              },
+              {
+                "type": "anyComponentStyle",
+                "maximumWarning": "20kb",
+                "maximumError": "80kb"
+              }
+            ],
             "polyfills": [
               "zone.js"
             ],
@@ -27,7 +39,12 @@
             "inlineStyleLanguage": "less",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              {
+                "glob": "**/*",
+                "input": "src/assets/leaflet",
+                "output": "./assets/leaflet"
+              }
             ],
             "styles": [
               "src/custom-theme.scss",
@@ -35,8 +52,7 @@
               "node_modules/leaflet/dist/leaflet.css",
               "node_modules/leaflet-routing-machine/dist/leaflet-routing-machine.css"
             ],
-            "scripts": [
-            ]
+            "scripts": []
           },
           "configurations": {
             "production": {
@@ -44,12 +60,12 @@
                 {
                   "type": "initial",
                   "maximumWarning": "500kb",
-                  "maximumError": "1mb"
+                  "maximumError": "2mb"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "2kb",
-                  "maximumError": "4kb"
+                  "maximumWarning": "20kb",
+                  "maximumError": "80kb"
                 }
               ],
               "outputHashing": "all"

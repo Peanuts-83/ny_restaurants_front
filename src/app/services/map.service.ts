@@ -10,7 +10,7 @@ export class MapService {
   private _initConf = {
     lng:0,
     lat:0,
-    zoom:10
+    zoom:12
   }
 
   public target = new BehaviorSubject<Marker|undefined>(undefined)
@@ -69,7 +69,7 @@ export class MapService {
     control.zoom({position: 'bottomright'}).addTo(l_map)
 
     // center on Manhattan
-    l_map.setView(this.coordToLeaflet([-73.97910823752092, 40.765744828087435]), 15)
+    l_map.setView(this.coordToLeaflet([-73.97910823752092, 40.765744828087435]), 16)
     this.leafletMap$ = new BehaviorSubject(l_map)
   }
 

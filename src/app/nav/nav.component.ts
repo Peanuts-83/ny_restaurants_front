@@ -29,7 +29,8 @@ export class NavComponent implements OnInit, OnDestroy, AfterViewInit {
   gradesControl = new FormControl<any | null>(null)
 
   target?: Marker
-  canUseHalo = false
+  @Input() canShowHalo = true
+  @Output() canShowHaloChange = new EventEmitter<boolean>()
   @Input() showHalo!: boolean
   @Output() showHaloChange = new EventEmitter<boolean>()
 

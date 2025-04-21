@@ -7,7 +7,7 @@
 // (imported above). For each palette, you can optionally specify a default, lighter, and darker
 // hue. Available color palettes: https://material.io/design/color/
 $ny_restaurants_front-primary: mat.define-palette(mat.$green-palette, 400);
-$ny_restaurants_front-accent: mat.define-palette(mat.$red-palette, A200);
+$ny_restaurants_front-accent: mat.define-palette(mat.$pink-palette, A200);
 
 // The warn palette is optional (defaults to red).
 $ny_restaurants_front-warn: mat.define-palette(mat.$deep-orange-palette);

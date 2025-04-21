@@ -1,5 +1,5 @@
 import { RestaurantListService } from './../nav/services/restaurant-list.service'
-import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnDestroy, Output, TemplateRef, ViewChild, ViewEncapsulation } from '@angular/core'
+import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef, ViewChild, ViewEncapsulation } from '@angular/core'
 import { MapService } from '../services/map.service'
 import * as L from "leaflet";
 import { LatLng, LeafletMouseEvent, Map, Marker, marker, icon, circle, Circle } from 'leaflet'
@@ -18,16 +18,23 @@ const lineOptions: L.Routing.LineOptions = {
   missingRouteTolerance: 3
 }
 
+
 @Component({
   selector: 'app-map',
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.less'],
   encapsulation: ViewEncapsulation.None
 })
-export class MapComponent implements AfterViewInit, OnDestroy {
+export class MapComponent implements AfterViewInit, OnDestroy, OnInit {
   private subs: Subscription[] = []
   private map!: Map
   private routePath!: L.Routing.Control
+
+  private colorAccent = '#FF80AB'
+
+  ngOnInit(): void {
+      L.Icon.Default.imagePath = "assets/leaflet/"
+  }
 
   /** markers list selected by user */
   private _markers: Marker[] = []
@@ -63,24 +70,28 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   private _haloMarkerList: Marker[] = []
 
   /** target & halo shown? */
-  public canSetPosition = false
-  public positionActive = false
+  public canSetPosition = true
+  public positionActive = true
 
   private _showNav!: boolean
   @Input()
   set showNav(value: boolean) {
     this._showNav = value
     const routingContainer: HTMLDivElement[] = this.elementRef.nativeElement.getElementsByClassName('leaflet-routing-container')
-    if (routingContainer.length>0) {
-      if (!value) {
-        routingContainer[0].className = 'leaflet-routing-container leaflet-bar leaflet-control leaflet-up'
-      } else {
-        routingContainer[0].className = 'leaflet-routing-container leaflet-bar leaflet-control'
-      }
-    }
+    this.doSetRoutingLevel(routingContainer, value)
   }
   get showNav(): boolean {
     return this._showNav
+  }
+
+  private doSetRoutingLevel(container: HTMLDivElement[], showNav?: boolean) {
+    if (container?.length>0) {
+      if (!showNav) {
+        container[0].className = 'leaflet-routing-container leaflet-bar leaflet-control leaflet-up'
+      } else {
+        container[0].className = 'leaflet-routing-container leaflet-bar leaflet-control'
+      }
+    }
   }
 
   private _canShowHalo = false
@@ -96,8 +107,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
           className: 'halo',
           radius: this.mapService.targetHalo.value,
           stroke: false,
-          fillColor: 'crimson',
-          fillOpacity: value ? .4 : 0
+          fillColor: this.colorAccent,
+          fillOpacity: value ? .3 : 0
         }))
         this.haloMarkerCircle.value?.addTo(this.map)
       }
@@ -166,6 +177,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         this.doRemoveMarker(undefined, true)
       }
     }))
+    // Load target by default
+    this.doSetTarget((<LeafletMouseEvent>{latlng: {lat: 40.766032966124875, lng: -73.97706260143013}}))
+    this.mapService.targetHalo.next(250)
   }
 
   /**
@@ -234,11 +248,30 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     }
     const l_coord: LatLng = this.mapService.coordToLeaflet(a_value.address.coord)
     const l_options: optionMarker = this.optionMarkerBuilder(a_value)
-    const l_marker = marker(l_coord).addTo(this.map)
-    l_options?.popupContent && showPopup && l_marker.bindPopup(l_options.popupContent).openPopup() || l_marker.bindPopup(l_options.popupContent)
+    const l_marker = marker(l_coord, {
+      icon: icon({
+        className: 'marker-icon',
+        iconRetinaUrl: 'assets/leaflet/marker-icon-2x.png',
+        iconUrl: 'assets/leaflet/marker-icon.png',
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        pane: 'overlayPane',
+      }),
+      title: a_value.name,
+      pane: 'overlayPane',
+      draggable: false,
+      riseOnHover: true
+    }).addTo(this.map)
+    // l_options?.popupContent && showPopup && l_marker.bindPopup(l_options.popupContent).openPopup() ||
+    l_marker.bindPopup(l_options.popupContent)
     l_options?.tooltipContent && l_marker.bindTooltip(l_options.tooltipContent)
     // make route to target on click
     l_marker.addEventListener('mouseup', (e: LeafletMouseEvent) => {
+      if (l_marker.getTooltip()?.isOpen()) {
+      l_marker.closePopup()
+    } else {
+      l_marker.openPopup()
+    }
       this.doRouteMarker(e.latlng)
     })
     if (isHalo) {
@@ -279,6 +312,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
    */
   public doRouteMarker(a_to: LatLng, a_from?: LatLng) {
     if (a_from || this.targetMarker) {
+      // remove previous route
       this.routePath && this.map.removeControl(this.routePath)
       a_from = a_from || this.targetMarker!.getLatLng()
       this.routePath = L.Routing.control({
@@ -287,11 +321,12 @@ export class MapComponent implements AfterViewInit, OnDestroy {
           L.latLng(a_to)
         ],
         routeWhileDragging: true,
-        // showAlternatives: true,
+        collapsible: true,
         lineOptions
       })
       this.routePath.addTo(this.map)
       this.routePath.getPlan()
+      this.doSetRoutingLevel(this.elementRef.nativeElement.getElementsByClassName('leaflet-routing-container'), this.showNav)
     }
   }
 
@@ -313,7 +348,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
   // Halo on/off
   public doToggleHalo() {
-    this.map?.removeLayer(this.haloMarkerCircle.value!)
+    this.haloMarkerCircle?.value && this.map?.removeLayer(this.haloMarkerCircle.value!)
     this.haloRestaurantList = []
   }
 
@@ -323,7 +358,9 @@ export class MapComponent implements AfterViewInit, OnDestroy {
    */
   public doSetTarget(a_event?: LeafletMouseEvent) {
     if (a_event) {
+      this.canShowHalo = true
       this.doCreateTarget(a_event.latlng)
+      this.canShowHalo = true
     } else if (!this.positionActive) {
       this.doRemoveTarget()
     }
@@ -353,7 +390,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.haloMarkerCircle.value && this.map.removeLayer(this.haloMarkerCircle.value!)
     const targetIcon = icon({
       className: 'target-icon',
-      iconUrl: '../../assets/img/target-icon.png',
+      iconUrl: 'assets/img/target-icon.png',
       iconSize: [40, 40],
       iconAnchor: [20, 20]
     })
@@ -370,8 +407,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
         className: 'halo',
         radius: this.mapService.targetHalo.value,
         stroke: false,
-        fillColor: 'crimson',
-        fillOpacity: this.canShowHalo ? .4 : 0
+        fillColor: this.colorAccent,
+        fillOpacity: this.canShowHalo ? .3 : 0
       }))
       this.haloMarkerCircle.value!.addTo(this.map)
     }
