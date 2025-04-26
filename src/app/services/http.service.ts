@@ -4,12 +4,13 @@ import { Injectable } from '@angular/core'
 import { Observable } from 'rxjs'
 import { AppHttpParams, CombinedFilter, Operator, OpField, SingleFilter } from '../models/filter-params.interface'
 import { HTTPResponse } from './base-api.service'
+import { environment } from '../../environments/environment.prod'
 
 @Injectable({
   providedIn: 'root'
 })
 export class HttpService {
-  private baseUrl = 'http://127.0.0.1:8000'
+  private baseUrl = environment.baseUrl
   private requestOptions = { withCredentials: true }
 
   constructor(private http: HttpClient) { }

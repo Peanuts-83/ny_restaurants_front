@@ -1,7 +1,7 @@
 import { ElementRef, Injectable } from '@angular/core';
-import { Browser, LatLng, Map, Marker, control, icon, latLng, map, marker, tileLayer } from 'leaflet'
+import { Browser, LatLng, Map, Marker, control, icon, latLng, map, tileLayer } from 'leaflet'
 import { BehaviorSubject } from 'rxjs'
-import {environment} from 'src/environments/environment'
+import { environment } from '../../environments/environment.prod'
 
 @Injectable({
   providedIn: 'root'

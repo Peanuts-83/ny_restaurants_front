@@ -3,10 +3,10 @@ import { ControlValueAccessor, FormControl, FormGroup, NG_VALUE_ACCESSOR, NgCont
 import { MatInput } from '@angular/material/input'
 import { MatSelect } from '@angular/material/select'
 import { BehaviorSubject, Subscription, debounceTime, distinctUntilChanged, of, switchMap } from 'rxjs'
-import { FilterParams, OpField, SortParams } from 'src/app/models/filter-params.interface'
-import { InputConf, SelectConf } from 'src/app/models/input-conf.interface'
-import { BaseApiService, HTTPResponse } from 'src/app/services/base-api.service'
-import { InfiniteScrollService } from 'src/app/services/infinite-scroll.service'
+import { FilterParams, OpField, SortParams } from '../../../models/filter-params.interface'
+import { SelectConf } from '../../../models/input-conf.interface'
+import { BaseApiService, HTTPResponse } from '../../../services/base-api.service'
+import { InfiniteScrollService } from '../../../services/infinite-scroll.service'
 
 
 /**

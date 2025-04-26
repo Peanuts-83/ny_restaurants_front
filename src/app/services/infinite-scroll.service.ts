@@ -1,8 +1,7 @@
 import { Injectable } from "@angular/core"
-import { Observable, of } from "rxjs"
-import { BaseApiService, HTTPResponse } from "src/app/services/base-api.service"
+import { Observable } from "rxjs"
 import { InputConf } from "../models/input-conf.interface"
-import { CombinedFilter, Operator, OpField, SingleFilter } from "../models/filter-params.interface"
+import { BaseApiService, HTTPResponse } from "./base-api.service"
 
 @Injectable({
   providedIn: 'root'
