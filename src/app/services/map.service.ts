@@ -21,7 +21,7 @@ export class MapService {
   constructor() {
     // setup marker icon
     const iconDefault = icon({
-      iconUrl:'../assets/leaflet/marker-icon-2x.png',
+      iconUrl:'assets/leaflet/marker-icon-2x.png',
       shadowUrl:'assets/leaflet/marker-shadow.png',
       iconSize:[38,60],
       iconAnchor:[20,60],

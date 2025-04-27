@@ -1,7 +1,7 @@
 import { RestaurantListService } from './../nav/services/restaurant-list.service'
 import { AfterViewInit, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef, ViewChild, ViewEncapsulation } from '@angular/core'
 import { MapService } from '../services/map.service'
-import * as L from "leaflet";
+import * as L from "leaflet"
 import { LatLng, LeafletMouseEvent, Map, Marker, marker, icon, circle, Circle } from 'leaflet'
 import { BehaviorSubject, Subscription } from 'rxjs'
 import { optionMarker, Restaurant } from '../models/restaurant.interface'
@@ -9,10 +9,10 @@ import { AppHttpParams, OpField } from '../models/filter-params.interface'
 import { __asyncValues } from 'tslib'
 import { HttpService } from '../services/http.service'
 // import "leaflet-routing-machine/dist/leaflet-routing-machine.css";
-import "leaflet-routing-machine";
+import "leaflet-routing-machine"
 
 const lineOptions: L.Routing.LineOptions = {
-  styles: [{color: 'green', opacity: 1, weight: 3, stroke: true, className: 'route-path', lineCap: 'round', lineJoin: 'round', dashArray: [3,7], bubblingMouseEvents: true}],
+  styles: [{ color: 'green', opacity: 1, weight: 3, stroke: true, className: 'route-path', lineCap: 'round', lineJoin: 'round', dashArray: [3, 7], bubblingMouseEvents: true }],
   addWaypoints: true,
   extendToWaypoints: true,
   missingRouteTolerance: 3
@@ -33,7 +33,7 @@ export class MapComponent implements AfterViewInit, OnDestroy, OnInit {
   private colorAccent = '#FF80AB'
 
   ngOnInit(): void {
-      L.Icon.Default.imagePath = "assets/leaflet/"
+    L.Icon.Default.imagePath = "assets/leaflet/"
   }
 
   /** markers list selected by user */
@@ -42,13 +42,13 @@ export class MapComponent implements AfterViewInit, OnDestroy, OnInit {
   /** map option */
   public oneMarker = true
 
-  private _targetMarker!: Marker|undefined
+  private _targetMarker!: Marker | undefined
   /** target for user position */
-  public set targetMarker(value: Marker|undefined) {
+  public set targetMarker(value: Marker | undefined) {
     this._targetMarker = value
     this.mapService.target.next(value)
   }
-  public get targetMarker(): Marker|undefined {
+  public get targetMarker(): Marker | undefined {
     return this._targetMarker
   }
 
@@ -85,7 +85,7 @@ export class MapComponent implements AfterViewInit, OnDestroy, OnInit {
   }
 
   private doSetRoutingLevel(container: HTMLDivElement[], showNav?: boolean) {
-    if (container?.length>0) {
+    if (container?.length > 0) {
       if (!showNav) {
         container[0].className = 'leaflet-routing-container leaflet-bar leaflet-control leaflet-up'
       } else {
@@ -101,23 +101,26 @@ export class MapComponent implements AfterViewInit, OnDestroy, OnInit {
       this._canShowHalo = value
       this.canShowHaloChange.emit(value)
       if (this.haloMarkerCircle.value) {
-        const coord = this.haloMarkerCircle.value.getLatLng()
-        this.map.removeLayer(this.haloMarkerCircle.value!)
-        this.haloMarkerCircle.next(circle(coord, {
-          className: 'halo',
-          radius: this.mapService.targetHalo.value,
-          stroke: false,
-          fillColor: this.colorAccent,
-          fillOpacity: value ? .3 : 0
-        }))
-        this.haloMarkerCircle.value?.addTo(this.map)
-      }
-      if (!value) {
-        this.doToggleHalo()
-        this.doRemoveMarker(undefined,true)
+        const coord = this.haloMarkerCircle.value?.getLatLng()
+        if (coord) {
+          this.map.removeLayer(this.haloMarkerCircle.value!)
+          this.haloMarkerCircle.next(circle(coord, {
+            className: 'halo',
+            radius: this.mapService.targetHalo.value,
+            stroke: false,
+            fillColor: this.colorAccent,
+            fillOpacity: value ? .3 : 0
+          }))
+          this.haloMarkerCircle.value?.addTo(this.map)
+        }
       }
     }
+    if (!value) {
+      this.doToggleHalo()
+      this.doRemoveMarker(undefined, true)
+    }
   }
+
   public get canShowHalo(): boolean {
     return this._canShowHalo
   }
@@ -178,7 +181,7 @@ export class MapComponent implements AfterViewInit, OnDestroy, OnInit {
       }
     }))
     // Load target by default
-    this.doSetTarget((<LeafletMouseEvent>{latlng: {lat: 40.766032966124875, lng: -73.97706260143013}}))
+    this.doSetTarget((<LeafletMouseEvent>{ latlng: { lat: 40.766032966124875, lng: -73.97706260143013 } }))
     this.mapService.targetHalo.next(250)
   }
 
@@ -187,13 +190,13 @@ export class MapComponent implements AfterViewInit, OnDestroy, OnInit {
    * if no restaurant is selected by user.
    */
   public doLoadHaloRestaurants() {
-    if (this.canShowHalo) {
+    if (this.canShowHalo && this.haloMarkerCircle?.value && this.haloMarkerCircle.value.getRadius() > 0) {
       const apiService = this.restaurantListService
       const apiParams: AppHttpParams = {
         ...apiService.listParams.value,
         nbr: 0, // get all
         page_nbr: 1,
-        filters: this.httpService.setFilter(Object.values(this.haloMarkerCircle.value!.getLatLng()).reverse(), this.haloMarkerCircle.value?.getRadius()!, OpField.GEO, this.restaurantListService.listParams.value.filters)
+        filters: this.httpService.setFilter(Object.values(this.haloMarkerCircle.value.getLatLng()).reverse(), this.haloMarkerCircle.value.getRadius()!, OpField.GEO, this.restaurantListService.listParams.value.filters)
       }
       apiService.doPost<Restaurant[]>(apiService.apiConf.baseApi, apiParams).subscribe(result => {
         this.haloRestaurantList = result.data
@@ -268,10 +271,10 @@ export class MapComponent implements AfterViewInit, OnDestroy, OnInit {
     // make route to target on click
     l_marker.addEventListener('mouseup', (e: LeafletMouseEvent) => {
       if (l_marker.getTooltip()?.isOpen()) {
-      l_marker.closePopup()
-    } else {
-      l_marker.openPopup()
-    }
+        l_marker.closePopup()
+      } else {
+        l_marker.openPopup()
+      }
       this.doRouteMarker(e.latlng)
     })
     if (isHalo) {
@@ -334,7 +337,7 @@ export class MapComponent implements AfterViewInit, OnDestroy, OnInit {
    * Target on/off
    * @param a_event
    */
-  public doToggleTarget(a_event?:MouseEvent) {
+  public doToggleTarget(a_event?: MouseEvent) {
     a_event?.stopPropagation()
     if (this.targetMarker) {
       this.positionActive = false
@@ -387,7 +390,7 @@ export class MapComponent implements AfterViewInit, OnDestroy, OnInit {
   public doCreateTarget(a_coord: LatLng) {
     // remove initial target if exist
     this.doRemoveTarget()
-    this.haloMarkerCircle.value && this.map.removeLayer(this.haloMarkerCircle.value!)
+    this.haloMarkerCircle.value && this.map?.removeLayer(this.haloMarkerCircle.value!)
     const targetIcon = icon({
       className: 'target-icon',
       iconUrl: 'assets/img/target-icon.png',
@@ -401,7 +404,7 @@ export class MapComponent implements AfterViewInit, OnDestroy, OnInit {
         title: 'target',
         pane: 'overlayPane'
       }).addTo(this.map)
-      this.positionActive = true
+    this.positionActive = true
     if (this.canSetPosition) {
       this.haloMarkerCircle.next(circle(a_coord, {
         className: 'halo',
@@ -414,7 +417,7 @@ export class MapComponent implements AfterViewInit, OnDestroy, OnInit {
     }
     this.canSetPosition = false
     // make route to target if restaurant selected
-    if (this._markers?.length>0) {
+    if (this._markers?.length > 0) {
       this.doRouteMarker(this._markers[0].getLatLng())
     }
   }

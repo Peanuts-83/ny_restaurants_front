@@ -4,7 +4,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build --base-href ./ --configuration production",
+    "build": "ng build --base-href ./ --configuration production && cp -r ./dist/* ~/server/www/projects/ny_restaurants/",
     "config": "ts-node src/environments/set-env.ts",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
