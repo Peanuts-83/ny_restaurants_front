@@ -21,7 +21,7 @@ wip...
 ## TODO
 
 * zoom to borough at selection
-* zoom/dezoom to keep selected restaurants in active zone
+* ~~zoom/dezoom to keep selected restaurants in active zone~~
 * landing page & animation
-* production config
-* trace path to selected
+* ~~production config~~
+* ~~trace path to selected~~
