@@ -4,6 +4,8 @@
 
 # Ny Restaurants (front-end) - HUNGRR!!!
 
+Demo: [https://www.thomasranque.com/projects/ny_restaurants/](https://www.thomasranque.com/projects/ny_restaurants/)
+
 HUNGRR!!! is a single page application made with Angular 17. It's designed to give access to a map of Newyork City, where the user could find restaurants around him.
 
 Some forms allow filtering and search for restaurant name, cuisine type, borough and other values.
